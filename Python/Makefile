@@ -1,6 +1,7 @@
 include Make.rules.arm
 BUILD_DIR?=$(shell pwd)
 DIST_FILE:=$(BUILD_DIR)/dist/nasa42-1.0.linux-x86_64.tar
+SLEN=$(shell dirname `tar -tf $(DIST_FILE) | grep packages | head -1` | sed -e 's/[^/]//g' | wc -c)
 
 GUIFLAG = -D _USE_GUI_
 #GUIFLAG = 
@@ -44,7 +45,6 @@ endif
 EXENAME = 42
 CC = gcc
 
-
 # Basic directories
 HOMEDIR = ../
 PROJDIR = ../
@@ -71,27 +71,19 @@ else
    FFTBOBJ = 
 endif
 
-#ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
-ANSIFLAGS = 
-
-CFLAGS = -Wall -Wshadow -Wno-deprecated  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG)
+ANSIFLAGS = -Werror
+CFLAGS = -Wall -Wshadow -Wno-deprecated  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) \
+ -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 \
+ $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) \
+  $(FFTBFLAG) $(GSFCFLAG) -DNPY_NO_DEPRECATED_API="NPY_1_7_API_VERSION"
 
 all:
 	CC="$(CC)" CFLAGS="$(CFLAGS) -L../" LDSHARED="$(CC) -shared -Wl,-E" python setup.py bdist --format=tar
 
-SLEN=$(shell dirname `tar -tf $(DIST_FILE) | grep packages | head -1` | sed -e 's/[^/]//g' | wc -c)
 TEST=$(shell dirname `tar -tf $(DIST_FILE) | grep packages | head -1` | sed -e 's/[^/]//g')
 
 install:
 	tar -C $(TARGET_PATH) --strip-components=$(SLEN) -xf $(DIST_FILE)
-
-
-.PHONY: polysat install
-
-all2: polysat.o
-
-polysat.o: polysat.c
-	$(CC) -pthread -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fPIC -I$(PY_INC) -c $< -o $@
 
 clean:
 	rm -fr *.o build

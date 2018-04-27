@@ -17,9 +17,8 @@ else
 	ETC_PATH=/etc
 	LOCAL_BIN_PATH=/usr/local/bin
 	STRIP=echo
-        CFLAGS+=-I$(ARM_TOOLCHAIN_PATH)/include -I$(ARM_TOOLCHAIN_PATH)/local/include
-        LDFLAGS+=-L$(ARM_TOOLCHAIN_PATH)/lib -L$(ARM_TOOLCHAIN_PATH)/local/lib
-	PY_INC=/home/luc/anaconda3/include/python3.6m
+   CFLAGS+=-I$(ARM_TOOLCHAIN_PATH)/include -I$(ARM_TOOLCHAIN_PATH)/local/include
+   LDFLAGS+=-L$(ARM_TOOLCHAIN_PATH)/lib -L$(ARM_TOOLCHAIN_PATH)/local/lib
 endif
 
 TARGET_PATH=/home/luc/anaconda3/lib/python3.6
