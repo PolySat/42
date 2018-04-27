@@ -1,0 +1,25 @@
+ifeq ($(TARGET),arm)
+	CC=$(ARM_TOOLCHAIN_PATH)/$(ARM_BIN_SUBPATH)cc
+	#STRIP=$(ARM_TOOLCHAIN_PATH)/$(ARM_BIN_SUBPATH)strip
+	STRIP=echo
+	LIB_PATH=$(ARM_TOOLCHAIN_PATH)/lib
+	INC_PATH=$(ARM_TOOLCHAIN_PATH)/include
+	BIN_PATH=$(ARM_TOOLCHAIN_PATH)/bin
+	SBIN_PATH=$(ARM_TOOLCHAIN_PATH)/sbin
+	ETC_PATH=$(ARM_TOOLCHAIN_PATH)/etc
+	LOCAL_BIN_PATH=$(ARM_TOOLCHAIN_PATH)/usr/local/bin
+	PY_INC=$(ARM_TOOLCHAIN_PATH)/../../staging/usr/local/include/python2.7
+else
+	LIB_PATH=/usr/lib
+	INC_PATH=/usr/include
+	BIN_PATH=/usr/bin
+	SBIN_PATH=/usr/sbin
+	ETC_PATH=/etc
+	LOCAL_BIN_PATH=/usr/local/bin
+	STRIP=echo
+        CFLAGS+=-I$(ARM_TOOLCHAIN_PATH)/include -I$(ARM_TOOLCHAIN_PATH)/local/include
+        LDFLAGS+=-L$(ARM_TOOLCHAIN_PATH)/lib -L$(ARM_TOOLCHAIN_PATH)/local/lib
+	PY_INC=/home/luc/anaconda3/include/python3.6m
+endif
+
+TARGET_PATH=/home/luc/anaconda3/lib/python3.6
