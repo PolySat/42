@@ -72,7 +72,7 @@ else
 endif
 
 ANSIFLAGS = -Werror
-CFLAGS = -Wall -Wshadow -Wno-deprecated  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) \
+CFLAGS = -Wall -Werror -Wshadow -Wno-deprecated $(GLINC) $(CINC) -I $(INC) \
  -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 \
  $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) \
   $(FFTBFLAG) $(GSFCFLAG) -DNPY_NO_DEPRECATED_API="NPY_1_7_API_VERSION"
@@ -80,10 +80,8 @@ CFLAGS = -Wall -Wshadow -Wno-deprecated  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC)
 all:
 	CC="$(CC)" CFLAGS="$(CFLAGS) -L../" LDSHARED="$(CC) -shared -Wl,-E" python3 setup.py bdist --format=tar
 
-TEST=$(shell dirname `tar -tf $(DIST_FILE) | grep packages | head -1` | sed -e 's/[^/]//g')
-
 install:
-	tar -C $(TARGET_PATH) --strip-components=$(SLEN) -xf $(DIST_FILE)
+	CC="$(CC)" CFLAGS="$(CFLAGS) -L../" LDSHARED="$(CC) -shared -Wl,-E" python3 setup.py install
 
 clean:
 	rm -fr *.o build
