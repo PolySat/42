@@ -28,6 +28,7 @@ extern long (*SimStepCB)(void);
 static void
 nasa42_Simulation_dealloc(nasa42_Simulation *self)
 {
+   Py_DECREF(self->sc_list);
    self->ob_base.ob_type->tp_free((PyObject *)self);
 }
 
@@ -39,6 +40,7 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    long Isc;
    char *argv[] = {"python-nasa42"};
    unsigned int i;
+   int res;
 
    // Initialize Nasa42 configuration
    InitSim(1, argv);
@@ -51,24 +53,29 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
 
    self->sc_list = PyList_New((Py_ssize_t)Nsc);
    if (!self->sc_list)
-      return -1;
+      goto error;
    
    for (i = 0; i < Nsc; i++) {
       sc = PyObject_New(nasa42_Spacecraft, &nasa42_SpacecraftType);
       if (!sc)
-         return -1;
+         goto error;
       Py_INCREF(sc);
 
       sc_args = Py_BuildValue("OI", self, i);
-      if (sc->ob_base.ob_type->tp_init((PyObject *)sc, sc_args, NULL) < 0) {
+      res = sc->ob_base.ob_type->tp_init((PyObject *)sc, sc_args, NULL);
+      Py_DECREF(sc_args);
+      if (res < 0) {
          Py_DECREF(sc);
-         return -1;
+         goto error;
       }
 
       PyList_SET_ITEM(self->sc_list, i, (PyObject *)sc);
    }
 
    return 0;
+error:
+   Py_XDECREF(self->sc_list);
+   return -1;
 }
 
 static PyObject *stepCB = NULL;
@@ -90,7 +97,7 @@ static long nasa42_Simulation_SimStepCB(void)
          res = PyLong_AsLong(resObj);
       else {
          printf("not a long!\n");
-	 PyObject_Print(resObj, stdout, 0);
+         PyObject_Print(resObj, stdout, 0);
       }
       if (resObj)
          Py_DECREF(resObj);
@@ -139,7 +146,7 @@ nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject*
 nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
 {
-   long Done = 0, stop_time;
+   long stop_time;
 
    static char *kwlist[] = {"stop_time", NULL};
    if (!PyArg_ParseTupleAndKeywords(args, kwds, "l", kwlist, &stop_time) ) {
@@ -154,17 +161,9 @@ nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
       return NULL;
    }
 
-   // STOPTIME = (double)(stop_time - AbsTime0);
-
-   // Not going to do GUI for now. For GUI to work, will need to be running
-   // in another thread, accessesing a shared mem location.
-
    /* Crunch numbers till done */
-   while(!Done) {
-      Done = SimStep();
-      if (stop_time <= AbsTime)
-         break;
-   }
+   while(stop_time > AbsTime)
+      SimStep();
 
    Py_INCREF(Py_None);
    return Py_None;
