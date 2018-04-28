@@ -22,6 +22,8 @@
 #include "42exec.h"
 #include "spacecraft.h"
 
+extern int HandoffToGui(int argc, char **argv);
+extern long (*SimStepCB)(void);
 
 static void
 nasa42_Simulation_dealloc(nasa42_Simulation *self)
@@ -69,6 +71,71 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    return 0;
 }
 
+static PyObject *stepCB = NULL;
+static PyObject *stepCB_sim = NULL;
+
+static long nasa42_Simulation_SimStepCB(void)
+{
+   if (stepCB) {
+      void *resObj;
+      long res = 1;
+
+      PyObject *arglist = Py_BuildValue("(O)", stepCB_sim);
+      // PyObject_Print(stepCB, stdout, 0);
+      resObj = PyEval_CallObject(stepCB, arglist);
+      Py_DECREF(arglist);
+      if (!resObj)
+         printf("No Res!\n");
+      if (resObj && PyLong_Check(resObj))
+         res = PyLong_AsLong(resObj);
+      else {
+         printf("not a long!\n");
+	 PyObject_Print(resObj, stdout, 0);
+      }
+      if (resObj)
+         Py_DECREF(resObj);
+      // printf("1 %p, res: %ld\n", stepCB, res);
+
+      return res;
+   }
+   return SimStep();
+}
+
+static PyObject*
+nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
+{
+   char *argv[] = { "42" };
+   PyObject *temp;
+
+   static char *kwlist[] = {"step_callback", NULL};
+   if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist, &temp) ) {
+      PyErr_SetString(PyExc_RuntimeError, "Must provide step method callback.");
+      return NULL; 
+   }
+   if (stepCB)
+      Py_XDECREF(stepCB);
+
+   if (temp && !PyCallable_Check(temp)) {
+      PyErr_SetString(PyExc_RuntimeError, "Must provide a method to callback.");
+      return NULL; 
+   }
+   stepCB = temp;
+   if (stepCB)
+      Py_XINCREF(stepCB);
+
+   if (stepCB_sim)
+      Py_XDECREF(stepCB_sim);
+
+   stepCB_sim = self;
+   Py_XINCREF(stepCB_sim);
+
+   SimStepCB = &nasa42_Simulation_SimStepCB;
+   HandoffToGui(1, argv);
+
+   Py_XINCREF(Py_None);
+   return Py_None;
+}
+
 static PyObject*
 nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -87,7 +154,7 @@ nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
       return NULL;
    }
 
-   STOPTIME = (double)(stop_time - AbsTime0);
+   // STOPTIME = (double)(stop_time - AbsTime0);
 
    // Not going to do GUI for now. For GUI to work, will need to be running
    // in another thread, accessesing a shared mem location.
@@ -95,14 +162,28 @@ nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
    /* Crunch numbers till done */
    while(!Done) {
       Done = SimStep();
+      if (stop_time <= AbsTime)
+         break;
    }
 
    Py_INCREF(Py_None);
    return Py_None;
 }
 
+static PyObject*
+nasa42_Simulation_SimStep(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    long done;
+
+    done = SimStep();
+
+    return PyLong_FromLong(done);
+}
+
 static PyMethodDef nasa42_Simulation_methods[] = {
    {"propagate", (PyCFunction)nasa42_Simulation_propagate, METH_VARARGS | METH_KEYWORDS, "Propagate satellite state to new time"},
+   {"startGUI", (PyCFunction)nasa42_Simulation_startGUI, METH_VARARGS | METH_KEYWORDS, "Display the 42 GUI"},
+   {"SimStep", (PyCFunction)nasa42_Simulation_SimStep, METH_VARARGS | METH_KEYWORDS, "Perform one simulation step"},
    {NULL, NULL, 0, NULL}
 };
 
