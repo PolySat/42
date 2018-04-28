@@ -217,6 +217,8 @@ void DrawWidget(struct WidgetType *W);
 void Idle(void);
 void AsciiKeyHandler(unsigned char CharCode, int x, int y);
 
+EXTERN long (*SimStepCB)(void);
+
 
 /*
 ** #ifdef __cplusplus

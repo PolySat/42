@@ -17,6 +17,9 @@
 #include "42GlutGui.h"
 #undef EXTERN
 
+long (*SimStepCB)(void) = &SimStep;
+
+
 /* #ifdef __cplusplus
 ** namespace _42 {
 ** using namespace Kit;
@@ -3706,9 +3709,11 @@ void Idle(void)
          POV.w[1] = 0.0;
          POV.w[2] = 0.0;
          if (TimerHasExpired) {
-            TimerHasExpired = 0;
-            glutTimerFunc(TimerDuration,TimerHandler,0);
-            Done = SimStep();
+            if (!TimerDuration) {
+               TimerHasExpired = 0;
+               glutTimerFunc(TimerDuration,TimerHandler,0);
+	    }
+            Done = SimStepCB();
             if (GLOutFlag) {
                UpdatePOV();
                glutSetWindow(CamWindow);
