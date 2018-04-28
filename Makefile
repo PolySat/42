@@ -17,8 +17,8 @@ ifeq ($(MSYSTEM),MINGW32)
 endif
 ifeq ($(AUTOPLATFORM),Failed)
    # Autodetect failed.  Set platform manually.
-   42PLATFORM = __APPLE__
-   #42PLATFORM = __linux__
+   #42PLATFORM = __APPLE__
+   42PLATFORM = __linux__
    #42PLATFORM = __MSYS__
 endif
 
