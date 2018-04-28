@@ -8,7 +8,7 @@
 #include "utils.h"
 
 
-PyObject* pyarray_from_dblarr(double *arr, unsigned int len)
+PyObject* pyarray_from_dblarray(npy_intp len, double arr[])
 {
    PyArrayObject *vec;
    npy_intp i, dims[] = {len};
@@ -26,13 +26,33 @@ PyObject* pyarray_from_dblarr(double *arr, unsigned int len)
    return (PyObject *)vec;
 }
 
+PyObject* pymatrix_from_dblmatrix(npy_intp x, npy_intp y, double arr[][y])
+{
+   npy_intp i, j, dims[] = {x, y};   
+   PyArrayObject *vec;
+   void *ptr;
+
+   vec = (PyArrayObject *)PyArray_EMPTY(2, dims, NPY_DOUBLE, 0);
+   if (!vec)
+      return NULL;
+
+   for (i = 0; i < 3; i++) {
+      for (j = 0; j < 3; j++) {
+         ptr = PyArray_GETPTR2(vec, i, j);
+         PyArray_SETITEM(vec, ptr, PyFloat_FromDouble(arr[i][j]));
+      }
+   }
+
+   return (PyObject *)vec;
+}
+
 char pyarg_parse_frame(PyObject *args, PyObject *kwds)
 {
    int frame;
 
    static char *kwlist[] = {"frame", NULL};
    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &frame) ) {
-      PyErr_SetString(PyExc_RuntimeError, "Function requires integer frame argument.");
+      PyErr_SetString(PyExc_RuntimeError, "Function requires integer frame as argument.");
       return 0; 
    }
 

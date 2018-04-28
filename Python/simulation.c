@@ -13,7 +13,6 @@
 
 #include <Python.h>
 #include <structmember.h>
-#include <numpy/arrayobject.h>
 #include <stddef.h>
 
 

@@ -58,6 +58,10 @@ nasa42_Spacecraft_init(nasa42_Spacecraft *self, PyObject *args, PyObject *kwds)
    return 0;
 }
 
+PyDoc_STRVAR(nasa42_Spacecraft_set_mtb__doc__,
+   "set_mtb(mag_id, mag_mmt) -> None\n\n"
+   "Set magnetorquer magnetic moment.");
+
 static PyObject*
 nasa42_Spacecraft_set_mtb(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -81,6 +85,10 @@ nasa42_Spacecraft_set_mtb(PyObject *self, PyObject *args, PyObject *kwds)
    Py_INCREF(Py_None);
    return Py_None;
 }
+
+PyDoc_STRVAR(nasa42_Spacecraft_set_wheel__doc__,
+   "set_wheel(whl_id, whl_torque) -> None\n\n"
+   "Set reaciton wheel torque.");
 
 static PyObject*
 nasa42_Spacecraft_set_wheel(PyObject *self, PyObject *args, PyObject *kwds)
@@ -106,6 +114,10 @@ nasa42_Spacecraft_set_wheel(PyObject *self, PyObject *args, PyObject *kwds)
    return Py_None;
 }
 
+PyDoc_STRVAR(nasa42_Spacecraft_position__doc__,
+   "position(frame) -> ndarray\n\n"
+   "Position vector of spacecraft.");
+
 static PyObject*
 nasa42_Spacecraft_position(PyObject *self, PyObject *args, PyObject *kwds)
 {
@@ -128,17 +140,17 @@ nasa42_Spacecraft_position(PyObject *self, PyObject *args, PyObject *kwds)
 
       case WORLD_ROTATING_FRAME:
          PyErr_SetString(PyExc_NotImplementedError,
-            "Spacecraft does not support position in WORLD_ROTATING_FRAME");
+            "No support for position in WORLD_ROTATING_FRAME");
          break;
       
       case LVLH_FRAME:
          PyErr_SetString(PyExc_NotImplementedError,
-            "Spacecraft does not support position in LVLH_FRAME");
+            "No support for position in LVLH_FRAME");
          break;
       
       case BODY_FRAME:
          PyErr_SetString(PyExc_NotImplementedError,
-            "Spacecraft does not support position in BODY_FRAME");
+            "No support for position in BODY_FRAME");
          break;
       
       default:
@@ -149,14 +161,85 @@ nasa42_Spacecraft_position(PyObject *self, PyObject *args, PyObject *kwds)
    if (!vec)
       return NULL;
 
-   return pyarray_from_dblarr(vec, 3);
+   return pyarray_from_dblarray(3, vec);
+}
+
+PyDoc_STRVAR(nasa42_Spacecraft_velocity__doc__,
+   "velocity(frame) -> ndarray\n\n"
+   "Velocity vector of spacecraft.");
+
+static PyObject*
+nasa42_Spacecraft_velocity(PyObject *self, PyObject *args, PyObject *kwds)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;   
+   double *vec = NULL;
+   char frame;
+
+   frame = pyarg_parse_frame(args, kwds);
+   if (!frame)
+      return NULL;
+
+   switch (frame) {
+      case HELIOCENTRIC_FRAME:
+         vec = sc->sc->VelH;
+         break;
+
+      case WORLD_INERTIAL_FRAME:
+         vec = sc->sc->VelN;
+         break;
+
+      case WORLD_ROTATING_FRAME:
+         PyErr_SetString(PyExc_NotImplementedError,
+            "No support for velocity in WORLD_ROTATING_FRAME");
+         break;
+      
+      case LVLH_FRAME:
+         PyErr_SetString(PyExc_NotImplementedError,
+            "No support for velocity in LVLH_FRAME");
+         break;
+      
+      case BODY_FRAME:
+         PyErr_SetString(PyExc_NotImplementedError,
+            "No support for velocity in BODY_FRAME");
+         break;
+      
+      default:
+         PyErr_Format(PyExc_ValueError, "Frame value %d not recognized.", frame);
+         break;
+   }
+
+   if (!vec)
+      return NULL;
+
+   return pyarray_from_dblarray(3, vec);
+}
+
+static PyObject*
+nasa42_Spacecraft_quaternion(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   return pyarray_from_dblarray(4, sc->sc->B->qn);
+}
+
+static PyObject*
+nasa42_Spacecraft_dcm_lvlh_inertial(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   return pymatrix_from_dblmatrix(3, 3, sc->sc->CLN);
 }
 
 static PyMethodDef nasa42_Spacecraft_methods[] = {
-   {"set_mtb", (PyCFunction)nasa42_Spacecraft_set_mtb, METH_VARARGS | METH_KEYWORDS, "Set magnetorquer magnetic moment"},
-   {"set_wheel",(PyCFunction)nasa42_Spacecraft_set_wheel, METH_VARARGS | METH_KEYWORDS, "Set reaction wheel torque"},
-   {"position", (PyCFunction)nasa42_Spacecraft_position, METH_VARARGS | METH_KEYWORDS, "Get position of satellite in ECI (m)"},   
+   {"set_mtb", (PyCFunction)nasa42_Spacecraft_set_mtb, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_set_mtb__doc__},
+   {"set_wheel",(PyCFunction)nasa42_Spacecraft_set_wheel, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_set_wheel__doc__},
+   {"position", (PyCFunction)nasa42_Spacecraft_position, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_position__doc__},   
+   {"velocity", (PyCFunction)nasa42_Spacecraft_velocity, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_velocity__doc__},   
    {NULL, NULL, 0, NULL}
+};
+
+static PyGetSetDef nasa42_Spacecraft_getset[] = {
+   {"quaternion", nasa42_Spacecraft_quaternion, NULL, "Satellite quaternion from ECI to Body.", NULL},   
+   {"dcm_lvlh_inertial", nasa42_Spacecraft_dcm_lvlh_inertial, NULL, "Rotation matrix from inertial to lvlh frame.", NULL},   
+   {NULL, NULL, NULL, NULL, NULL}
 };
 
 PyTypeObject nasa42_SpacecraftType = {
@@ -188,8 +271,8 @@ PyTypeObject nasa42_SpacecraftType = {
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
     nasa42_Spacecraft_methods,             /* tp_methods */
-    0,             /* tp_members */
-    0,                         /* tp_getset */
+    0,                         /* tp_members */
+    nasa42_Spacecraft_getset,  /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
