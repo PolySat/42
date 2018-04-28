@@ -78,7 +78,7 @@ CFLAGS = -Wall -Wshadow -Wno-deprecated  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC)
   $(FFTBFLAG) $(GSFCFLAG) -DNPY_NO_DEPRECATED_API="NPY_1_7_API_VERSION"
 
 all:
-	CC="$(CC)" CFLAGS="$(CFLAGS) -L../" LDSHARED="$(CC) -shared -Wl,-E" python setup.py bdist --format=tar
+	CC="$(CC)" CFLAGS="$(CFLAGS) -L../" LDSHARED="$(CC) -shared -Wl,-E" python3 setup.py bdist --format=tar
 
 TEST=$(shell dirname `tar -tf $(DIST_FILE) | grep packages | head -1` | sed -e 's/[^/]//g')
 
