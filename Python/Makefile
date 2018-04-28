@@ -75,7 +75,7 @@ ANSIFLAGS = -Werror
 CFLAGS = -Wall -Wshadow -Wno-deprecated  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) \
  -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 \
  $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) \
-  $(FFTBFLAG) $(GSFCFLAG) -DNPY_NO_DEPRECATED_API="NPY_1_7_API_VERSION"
+  $(FFTBFLAG) $(GSFCFLAG) -DNPY_NO_DEPRECATED_API="NPY_1_7_API_VERSION" -Wno-unused-function
 
 all:
 	CC="$(CC)" CFLAGS="$(CFLAGS) -L../" LDSHARED="$(CC) -shared -Wl,-E" python setup.py bdist --format=tar
