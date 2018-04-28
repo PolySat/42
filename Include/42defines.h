@@ -159,6 +159,13 @@
 #define FRAME_S 3
 #define FRAME_B 4
 
+/* SC Frames */
+#define HELIOCENTRIC_FRAME 'H'
+#define WORLD_INERTIAL_FRAME 'N'
+#define WORLD_ROTATING_FRAME 'W'
+#define LVLH_FRAME 'L'
+#define BODY_FRAME 'B'
+
 /* POV (Host and) Target Types */
 #define TARGET_WORLD 0
 #define TARGET_REFORB 1

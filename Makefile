@@ -28,8 +28,8 @@ GUIFLAG = -D _USE_GUI_
 SHADERFLAG = -D _USE_SHADERS_
 #SHADERFLAG = 
 
-#TIMEFLAG = 
-TIMEFLAG = -D _USE_SYSTEM_TIME_
+TIMEFLAG = 
+#TIMEFLAG = -D _USE_SYSTEM_TIME_
 
 CFDFLAG = 
 #CFDFLAG = -D _ENABLE_CFD_SLOSH_
@@ -54,6 +54,9 @@ GSFCSRC = $(PROJDIR)/GSFC/Source/
 
 #EMBEDDED = -D EMBEDDED_MATLAB
 EMBEDDED = 
+
+SO_NAME=libnasa42.so
+LIB_NAME=libnasa42.so
 
 ifneq ($(strip $(EMBEDDED)),)
    MATLABROOT = "C:/Program Files/MATLAB/R2010b/"
@@ -97,7 +100,7 @@ ifeq ($(42PLATFORM),__linux__)
    CINC =
    EXTERNDIR =  
 
-   #SOCKETFLAG = 
+#   SOCKETFLAG = 
    SOCKETFLAG = -D _ENABLE_SOCKETS_
 
    ifneq ($(strip $(GUIFLAG)),)
@@ -105,7 +108,7 @@ ifeq ($(42PLATFORM),__linux__)
       #GLINC = -I /usr/include/
       GLINC = -I $(KITDIR)/include/GL/
       LIBS = -lglut -lGLU -lGL 
-      LFLAGS = -L $(KITDIR)/GL/lib/
+      LFLAGS = -L $(KITDIR)/GL/lib/ -shared -fPIC -Wl,-soname,$(SO_NAME)
       ARCHFLAG = 
    else
       GUIOBJ = 
@@ -115,7 +118,7 @@ ifeq ($(42PLATFORM),__linux__)
       ARCHFLAG = 
    endif
    EXENAME = 42
-   CC = g++
+   CC = gcc
 endif
 
 ifeq ($(42PLATFORM),__MSYS__)
@@ -170,7 +173,7 @@ endif
 #ANSIFLAGS = -Wstrict-prototypes -pedantic -ansi -Werror
 ANSIFLAGS = 
 
-CFLAGS = -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG)
+CFLAGS = -fPIC -Wall -Wshadow -Wno-deprecated -g  $(ANSIFLAGS) $(GLINC) $(CINC) -I $(INC) -I $(KITINC) -I $(KITSRC) -I $(MATLABSRC) -I $(MATLABINC) -I $(SIMULINKINC) -O0 $(ARCHFLAG) $(GUIFLAG) $(SHADERFLAG) $(TIMEFLAG) $(SOCKETFLAG) $(EMBEDDED) $(CFDFLAG) $(FFTBFLAG) $(GSFCFLAG)
 
 42OBJ = $(OBJ)42main.o $(OBJ)42exec.o $(OBJ)42actuators.o $(OBJ)42cmd.o \
 $(OBJ)42dynam.o $(OBJ)42environs.o $(OBJ)42ephem.o $(OBJ)42fsw.o \
@@ -195,7 +198,7 @@ endif
 ##########################  Rules to link 42  #############################
 
 42 : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
-	$(CC) $(LFLAGS) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS)  
+	$(CC) $(LFLAGS) -o $(LIB_NAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS)  
 
 ####################  Rules to compile objects  ###########################
 

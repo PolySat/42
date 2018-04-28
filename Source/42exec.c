@@ -15,6 +15,7 @@
 #define DECLARE_GLOBALS
 #include "42.h"
 #undef DECLARE_GLOBALS
+#include "42exec.h"
 
 /* #ifdef __cplusplus
 ** namespace _42 {
@@ -246,7 +247,7 @@ long SimStep(void)
          Report();  /* File Output */
       }
 
-      ReportProgress();
+      //ReportProgress();
       ManageFlags();
 
       /* Read and Interpret Command Script File */
@@ -263,7 +264,8 @@ long SimStep(void)
       ManageBoundingBoxes();
 
       #ifdef _ENABLE_SOCKETS_
-         InterProcessComm(); /* Send and receive from external processes */
+      // NOTE: Commenting this out for now. May want to use this in the future.
+//         InterProcessComm(); /* Send and receive from external processes */
       #endif
       Ephemerides(); /* Sun, Moon, Planets, Spacecraft, Useful Auxiliary Frames */
       ZeroFrcTrq();
@@ -291,6 +293,7 @@ long SimStep(void)
             }
          #endif
       }
+
       return(SimComplete);
 
 }
