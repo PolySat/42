@@ -61,7 +61,7 @@ PyInit_nasa42(void)
    // Add module constants
    if (PyModule_AddIntConstant(m, "LVLH_FRAME", LVLH_FRAME) < 0)
       return NULL;
-   if (PyModule_AddIntConstant(m, "BODY_FRAME", LVLH_FRAME) < 0)
+   if (PyModule_AddIntConstant(m, "BODY_FRAME", BODY_FRAME) < 0)
       return NULL;
    if (PyModule_AddIntConstant(m, "HELIOCENTRIC_FRAME", HELIOCENTRIC_FRAME) < 0)
       return NULL;
