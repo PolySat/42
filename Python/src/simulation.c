@@ -179,11 +179,22 @@ nasa42_Simulation_SimStep(PyObject *self, PyObject *args, PyObject *kwds)
     return PyLong_FromLong(done);
 }
 
+static PyObject*
+nasa42_Simulation_epoch(PyObject *self, void *arg)
+{
+   return PyFloat_FromDouble(AbsTime - UNIX_EPOCH);
+}
+
 static PyMethodDef nasa42_Simulation_methods[] = {
    {"propagate", (PyCFunction)nasa42_Simulation_propagate, METH_VARARGS | METH_KEYWORDS, "Propagate satellite state to new time"},
    {"startGUI", (PyCFunction)nasa42_Simulation_startGUI, METH_VARARGS | METH_KEYWORDS, "Display the 42 GUI"},
    {"SimStep", (PyCFunction)nasa42_Simulation_SimStep, METH_VARARGS | METH_KEYWORDS, "Perform one simulation step"},
    {NULL, NULL, 0, NULL}
+};
+
+static PyGetSetDef nasa42_Simulation_getset[] = {
+   {"epoch", nasa42_Simulation_epoch, NULL, "Current simulation epoch time.", NULL},   
+   {NULL, NULL, NULL, NULL, NULL}
 };
 
 static PyMemberDef nasa42_Simulation_members[] = {
@@ -221,7 +232,7 @@ PyTypeObject nasa42_SimulationType = {
     0,		               /* tp_iternext */
     nasa42_Simulation_methods,             /* tp_methods */
     nasa42_Simulation_members,             /* tp_members */
-    0,                         /* tp_getset */
+    nasa42_Simulation_getset,              /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */

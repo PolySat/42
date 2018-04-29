@@ -28,7 +28,7 @@ GUIFLAG = -D _USE_GUI_
 SHADERFLAG = -D _USE_SHADERS_
 #SHADERFLAG = 
 
-TIMEFLAG = 
+TIMEFLAG =
 #TIMEFLAG = -D _USE_SYSTEM_TIME_
 
 CFDFLAG = 
@@ -54,9 +54,6 @@ GSFCSRC = $(PROJDIR)/GSFC/Source/
 
 #EMBEDDED = -D EMBEDDED_MATLAB
 EMBEDDED = 
-
-SO_NAME=libnasa42.so
-LIB_NAME=libnasa42.so
 
 ifneq ($(strip $(EMBEDDED)),)
    MATLABROOT = "C:/Program Files/MATLAB/R2010b/"
@@ -107,8 +104,8 @@ ifeq ($(42PLATFORM),__linux__)
       GUIOBJ = $(OBJ)42GlutGui.o $(OBJ)glkit.o 
       #GLINC = -I /usr/include/
       GLINC = -I $(KITDIR)/include/GL/
-      LIBS = -lglut -lGLU -lGL 
-      LFLAGS = -L $(KITDIR)/GL/lib/ -shared -fPIC -Wl,-soname,$(SO_NAME)
+      LIBS = -lglut -lGLU -lGL -lm
+      LFLAGS = -L $(KITDIR)/GL/lib/
       ARCHFLAG = 
    else
       GUIOBJ = 
@@ -198,7 +195,8 @@ endif
 ##########################  Rules to link 42  #############################
 
 42 : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
-	$(CC) $(LFLAGS) -o $(LIB_NAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS)  
+	ar rcs libnasa42.a $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
+	$(CC) $(LFLAGS) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS)
 
 ####################  Rules to compile objects  ###########################
 
@@ -306,7 +304,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm $(OBJ)*.o ./$(EXENAME) $(INOUT)*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm *.a $(OBJ)*.o ./$(EXENAME) $(INOUT)*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
 endif
 
 

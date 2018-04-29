@@ -16,13 +16,13 @@ def stepCallback(simp):
 
     now = now + 100
     simp.propagate(now)
+    print('Time: ' + str(simp.epoch))
     print('Position: ' + str(simp.spacecraft[0].position(eci)))
     return 0
 
 def ssCallback(sim):
     return sim.SimStep()
 
-simulation.propagate(now)
 simulation.startGUI(stepCallback)
 #for t in range(1474416005, 1474419100, 100):
 #   simulation.propagate(t)
