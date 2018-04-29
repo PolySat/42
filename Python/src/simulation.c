@@ -91,17 +91,19 @@ static long nasa42_Simulation_SimStepCB(void)
       // PyObject_Print(stepCB, stdout, 0);
       resObj = PyEval_CallObject(stepCB, arglist);
       Py_DECREF(arglist);
-      if (!resObj)
-         printf("No Res!\n");
+      if (!resObj) {
+         if (!PyErr_Occurred())
+            PyErr_SetString(PyExc_ValueError, "Nothing returned by simulation callback.\n");
+         PyErr_PrintEx(0);
+      }
       if (resObj && PyLong_Check(resObj))
          res = PyLong_AsLong(resObj);
       else {
-         printf("not a long!\n");
-         PyObject_Print(resObj, stdout, 0);
+         PyErr_SetString(PyExc_TypeError, "Simulation callback return type is not long.\n");
+         PyErr_PrintEx(0);
       }
       if (resObj)
          Py_DECREF(resObj);
-      // printf("1 %p, res: %ld\n", stepCB, res);
 
       return res;
    }
@@ -146,10 +148,10 @@ nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
 static PyObject*
 nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
 {
-   long stop_time;
+   double stop_time;
 
    static char *kwlist[] = {"stop_time", NULL};
-   if (!PyArg_ParseTupleAndKeywords(args, kwds, "l", kwlist, &stop_time) ) {
+   if (!PyArg_ParseTupleAndKeywords(args, kwds, "d", kwlist, &stop_time) ) {
       PyErr_SetString(PyExc_RuntimeError, "Must provide propagation stop time.");
       return NULL; 
    }
