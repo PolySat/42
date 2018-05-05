@@ -195,8 +195,14 @@ endif
 ##########################  Rules to link 42  #############################
 
 42 : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
-	ar rcs libnasa42.a $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
 	$(CC) $(LFLAGS) -o $(EXENAME) $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ) $(LIBS)
+
+python: libnasa42.a
+	CC="$(CC)" CFLAGS="$(CFLAGS) -DNPY_NO_DEPRECATED_API="NPY_1_7_API_VERSION" -L../"\
+		LDSHARED="$(CC) -shared -Wl,-E" python3 Python/setup.py install
+
+libnasa42.a : $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
+	ar rcs libnasa42.a $(42OBJ) $(GUIOBJ) $(IPCOBJ) $(FFTBOBJ) $(SLOSHOBJ) $(KITOBJ) $(MATLABOBJ)
 
 ####################  Rules to compile objects  ###########################
 
@@ -304,7 +310,7 @@ ifeq ($(42PLATFORM),_WIN32)
 else ifeq ($(42PLATFORM),_WIN64)
 	del .\Object\*.o .\$(EXENAME) .\InOut\*.42
 else
-	rm *.a $(OBJ)*.o ./$(EXENAME) $(INOUT)*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42
+	rm -rf *.a $(OBJ)*.o ./$(EXENAME) $(INOUT)*.42 ./Demo/*.42 ./Rx/*.42 ./Tx/*.42 build
 endif
 
 
