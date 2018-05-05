@@ -24,9 +24,15 @@ FILE *FileOpen(const char *Path, const char *File, const char *CtrlCode)
 {
       FILE *FilePtr;
       char *FileName;
+      int path_len;
 
-      FileName = (char *) calloc(strlen(Path)+strlen(File)+1,sizeof(char));
+      path_len = strlen(Path);
+      FileName = (char *) calloc(path_len+strlen(File)+2,sizeof(char));
       strcpy(FileName,Path);
+      if (FileName[path_len-1] != '/' && File[0] != '/') {
+         FileName[path_len] = '/';
+         FileName[path_len + 1] = 0;
+      }
       strcat(FileName,File);
       FilePtr=fopen(FileName,CtrlCode);
       if(FilePtr == NULL) {

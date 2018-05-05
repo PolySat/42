@@ -35,15 +35,40 @@ nasa42_Simulation_dealloc(nasa42_Simulation *self)
 static int
 nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
 {
+   Py_ssize_t size;
    nasa42_Spacecraft *sc;
-   PyObject *sc_args;
+   PyObject *sc_args = NULL, *directory = NULL, *nasa42_data = NULL;
    long Isc;
-   char *argv[] = {"python-nasa42"};
+   char *argv[] = {"python-nasa42", NULL, NULL, NULL, NULL};
+   char *data_dir, *model_dir = NULL;
    unsigned int i;
-   int res;
+   int res, len;
+
+   argv[1] = "InOut";
+   argv[2] = "Model";
+
+   nasa42_data = PyImport_ImportModule("nasa42_data");
+   if (!nasa42_data)
+      goto error;
+
+   directory = PyObject_GetAttrString(nasa42_data, "directory");
+   if (!directory)
+      goto error;
+
+   data_dir = PyUnicode_AsUTF8AndSize(directory, &size);
+   if (!data_dir)
+      goto error;
+   
+   len = strlen(data_dir);
+   model_dir = malloc(len + strlen("/Model") + 1);
+   if (!model_dir)
+      goto error;
+   strcpy(model_dir, data_dir);
+   strcpy(model_dir + len, "/Model");
+   argv[3] = model_dir;
 
    // Initialize Nasa42 configuration
-   InitSim(1, argv);
+   InitSim(4, argv);
    for (Isc=0;Isc<Nsc;Isc++) {
       if (SC[Isc].Exists) {
          InitSpacecraft(&SC[Isc]);
@@ -73,7 +98,11 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    }
 
    return 0;
+
 error:
+   if (model_dir) free(model_dir);
+   Py_XDECREF(nasa42_data);
+   Py_XDECREF(directory);
    Py_XDECREF(self->sc_list);
    return -1;
 }
@@ -113,8 +142,10 @@ static long nasa42_Simulation_SimStepCB(void)
 static PyObject*
 nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
 {
-   char *argv[] = { "42" };
-   PyObject *temp;
+   char *argv[] = { "42", NULL, NULL, NULL, NULL }, modelPath[4096], shaderPath[4096], worldPath[4096];
+   PyObject *temp, *nasa42_data, *directory;
+   char *data_dir;
+   Py_ssize_t size;   
 
    static char *kwlist[] = {"step_callback", NULL};
    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist, &temp) ) {
@@ -128,6 +159,8 @@ nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
       PyErr_SetString(PyExc_RuntimeError, "Must provide a method to callback.");
       return NULL; 
    }
+
+   // Setup use callback
    stepCB = temp;
    if (stepCB)
       Py_XINCREF(stepCB);
@@ -139,7 +172,27 @@ nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
    Py_XINCREF(stepCB_sim);
 
    SimStepCB = &nasa42_Simulation_SimStepCB;
-   HandoffToGui(1, argv);
+
+   nasa42_data = PyImport_ImportModule("nasa42_data");
+   if (!nasa42_data)
+      return NULL;
+   directory = PyObject_GetAttrString(nasa42_data, "directory");
+   if (!directory)
+      return NULL;
+
+   data_dir = PyUnicode_AsUTF8AndSize(directory, &size);
+   if (!data_dir)
+      return NULL;
+
+   // Setup asset directory path
+   sprintf(modelPath, "%s/%s", data_dir, "Model");
+   sprintf(shaderPath, "%s/%s", data_dir, "Kit/Shaders");
+   sprintf(worldPath, "%s/%s", data_dir, "World");
+   argv[1] = modelPath;
+   argv[2] = shaderPath;
+   argv[3] = worldPath;
+
+   HandoffToGui(4, argv);
 
    Py_XINCREF(Py_None);
    return Py_None;

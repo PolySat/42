@@ -2346,7 +2346,7 @@ void LoadMoonOfEarth(void)
 }
 /**********************************************************************/
 /*  See JPL web pages MoonEphems and MoonParms in Development folder  */
-void LoadMoonsOfMars(void)
+void LoadMoonsOfMars(char *installedModelPath)
 {
 #define Nm 2
 
@@ -2428,7 +2428,7 @@ void LoadMoonsOfMars(void)
          M->Type = MOON;
       }
       strcpy(World[PHOBOS].GeomFileName,"Phobos.obj");
-      Geom = LoadWingsObjFile(ModelPath,World[PHOBOS].GeomFileName,
+      Geom = LoadWingsObjFile(installedModelPath,World[PHOBOS].GeomFileName,
          &Matl,&Nmatl,Geom,&Ngeom,&World[PHOBOS].GeomTag,FALSE);
 
 
@@ -2908,7 +2908,7 @@ void LoadMoonsOfPluto(void)
 #undef Nm
 }
 /**********************************************************************/
-void LoadMinorBodies(void)
+void LoadMinorBodies(const char *installedModelPath)
 {
       FILE *infile;
       struct WorldType *W;
@@ -2919,7 +2919,7 @@ void LoadMinorBodies(void)
       double CNJ[3][3],PoleRA,PoleDec,Epoch;
       double ZAxis[3] = {0.0,0.0,1.0};
 
-      infile = FileOpen(ModelPath,"MinorBodies.txt","r");
+      infile = FileOpen(installedModelPath,"MinorBodies.txt","r");
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&Nmb,junk,&newline);
       if (Nmb > 10) {
@@ -3128,6 +3128,7 @@ void InitSim(int argc, char **argv)
           {-0.867665382947348,-0.198076649977489, 0.455985113757595}};
       double qJ2000h[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
       double CJ2000H[3][3];
+      char *installedModelPath = "./Model";
 
       Pi = 4.0*atan(1.0);
       TwoPi = 2.0*Pi;
@@ -3141,6 +3142,7 @@ void InitSim(int argc, char **argv)
       sprintf(ModelPath,"./Model/");
       if (argc > 1) sprintf(InOutPath,"./%s/",argv[1]);
       if (argc > 2) sprintf(ModelPath,"./%s/",argv[2]);
+      if (argc > 3) installedModelPath = argv[3];
 
 /* .. Read from file Inp_Sim.txt */
       infile=FileOpen(InOutPath,"Inp_Sim.txt","r");
@@ -3282,12 +3284,12 @@ void InitSim(int argc, char **argv)
 
 /* .. Load Materials */
       Nmatl = 0;
-      Matl = AddMtlLib(ModelPath,"42.mtl",Matl,&Nmatl);
+      Matl = AddMtlLib(installedModelPath,"42.mtl",Matl,&Nmatl);
       ScaleSpecDiffFrac(Matl,Nmatl);
 
       /* Known bug: First Geom loaded in gets corrupted.
       Kludge fix: Load a sacrificial geom first.  */
-      Geom = LoadWingsObjFile(ModelPath,"Point.obj",
+      Geom = LoadWingsObjFile(installedModelPath,"Point.obj",
             &Matl,&Nmatl,Geom,&Ngeom,&JunkTag,FALSE);
 
 /* .. Time */
@@ -3308,7 +3310,7 @@ void InitSim(int argc, char **argv)
 
 /* .. Load Moons */
       if (World[EARTH].Exists) LoadMoonOfEarth();
-      if (World[MARS].Exists) LoadMoonsOfMars();
+      if (World[MARS].Exists) LoadMoonsOfMars(installedModelPath);
       if (World[JUPITER].Exists) LoadMoonsOfJupiter();
       if (World[SATURN].Exists) LoadMoonsOfSaturn();
       if (World[URANUS].Exists) LoadMoonsOfUranus();
@@ -3316,7 +3318,7 @@ void InitSim(int argc, char **argv)
       if (World[PLUTO].Exists) LoadMoonsOfPluto();
 
 /* .. Asteroids and Comets */
-      if (MinorBodiesExist) LoadMinorBodies();
+      if (MinorBodiesExist) LoadMinorBodies(installedModelPath);
       else Nmb = 0;
 
 /* .. Regions */

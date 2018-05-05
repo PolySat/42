@@ -302,6 +302,7 @@ int exec(int argc,char **argv)
 {
       long Isc;
       long Done = 0;
+      int consumedArgs = 0;
 
       InitSim(argc,argv);
       for (Isc=0;Isc<Nsc;Isc++) {
@@ -310,12 +311,19 @@ int exec(int argc,char **argv)
             InitFSW(&SC[Isc]);
          }
       }
+      
+      // Consume args used by InitSim
+      if (argc == 2)
+         consumedArgs = 2;
+      else if(argc >= 3)
+         consumedArgs = 3;
+
       CmdInterpreter();
       #ifdef _ENABLE_SOCKETS_
          InitInterProcessComm();
       #endif
       #ifdef _USE_GUI_
-         if (GLEnable) HandoffToGui(argc,argv);
+         if (GLEnable) HandoffToGui(argc - consumedArgs, &argv[consumedArgs]);
          else {
             while(!Done) {
                Done = SimStep();

@@ -38,7 +38,7 @@ static struct PyModuleDef nasa42module = {
 PyMODINIT_FUNC
 PyInit_nasa42(void)
 {
-   PyObject* m;
+   PyObject *m;
    Py42Error = PyErr_NewException("nasa42.Error", NULL, NULL);
    
    nasa42_SimulationType.tp_new = PyType_GenericNew;

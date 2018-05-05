@@ -139,7 +139,7 @@ GLuint PpmToCubeTag(const char path[40], const char file[40], int BytesPerPixel)
 GLuint PpmToRingTexTag(const char path[80], const char filename[80]);
 void CubeToPpm(GLubyte *Cube, long N, const char pathname[40],const char filename[40]);
 void LoadBucky(double BuckyPf[32][3], long BuckyNeighbor[32][6]);
-void LoadStars(const char StarFileName[40],double BuckyPf[32][3],
+void LoadStars(const char *modelPath, const char StarFileName[40],double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint StarList[32],
                double SkyDistance);
 void DrawStars(double LineOfSight[3],double BuckyPf[32][3],
@@ -159,13 +159,13 @@ GLuint LoadMilkyWay(const char *PathName,const char *FileName, double CGH[3][3],
    double SkyDistance, double AlphaMask[4]);
 GLuint LoadSkyCube(const char *PathName,const char *FileName, double CGH[3][3],
    double SkyDistance);
-void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
+void LoadEgretCatalog(const char *modelPath, const char *EgretFileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint EgretSourceList[32],
                double SkyDistance);
-void Load1FGL(const char *FileName,double BuckyPf[32][3],
+void Load1FGL(const char *modelPath, const char *FileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint FermiSourceList[32],
                double SkyDistance);
-void LoadPulsars(const char *FileName,double BuckyPf[32][3],
+void LoadPulsars(const char *modelPath, const char *FileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint PulsarList[32],
                double SkyDistance);
 void DrawUnitCubeSphere(long Ndiv);

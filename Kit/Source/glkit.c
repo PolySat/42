@@ -1186,7 +1186,7 @@ void LoadBucky(double BuckyPf[32][3], long BuckyNeighbor[32][6])
       }
 }
 /**********************************************************************/
-void LoadStars(const char StarFileName[40],double BuckyPf[32][3],
+void LoadStars(const char *modelPath, const char StarFileName[40],double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint StarList[32],
                double SkyDistance)
 {
@@ -1210,11 +1210,11 @@ void LoadStars(const char StarFileName[40],double BuckyPf[32][3],
       GLuint StarTexTag;
 
       LoadBucky(BuckyPf,BuckyNeighbor);
-      StarTexTag = PpmToTexTag("./Model/","StarTexture.ppm",4,GL_REPEAT);
+      StarTexTag = PpmToTexTag(modelPath, "StarTexture.ppm",4,GL_REPEAT);
 
       for(k=0;k<32;k++) N[k] = 0;
 
-      StarFile = FileOpen("./Model/",StarFileName,"r");
+      StarFile = FileOpen(modelPath, StarFileName,"r");
       fscanf(StarFile,"%ld",&Nstar);
       ID = (long **) calloc(32,sizeof(long *));
       if (ID == NULL) {
@@ -1695,7 +1695,7 @@ GLuint LoadSkyCube(const char *PathName, const char *FileName, double CGH[3][3],
 }
 /**********************************************************************/
 /* Egret Catalog of Gamma-ray Sources                                 */
-void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
+void LoadEgretCatalog(const char *modelPath, const char *EgretFileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6], GLuint EgretSourceList[32],
                double SkyDistance)
 {
@@ -1719,7 +1719,7 @@ void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
 
       for(k=0;k<32;k++) N[k] = 0;
 
-      SourceFile = FileOpen("./Model/",EgretFileName,"r");
+      SourceFile = FileOpen(modelPath, EgretFileName,"r");
       for(i=0;i<Nsource;i++) {
          fscanf(SourceFile,"%lf %lf %c %[^\n]\n",
             &RA,&Dec,&GammaSource[i].Type,
@@ -1803,7 +1803,7 @@ void LoadEgretCatalog(const char *EgretFileName,double BuckyPf[32][3],
 }
 /**********************************************************************/
 /* Fermi Source Catalog 1FGL                                          */
-void Load1FGL(const char *FileName,double BuckyPf[32][3],
+void Load1FGL(const char *modelPath, const char *FileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint FermiSourceList[32],
                double SkyDistance)
 {
@@ -1949,7 +1949,7 @@ void Load1FGL(const char *FileName,double BuckyPf[32][3],
 
       for(k=0;k<32;k++) N[k] = 0;
 
-      infile = FileOpen("./Model/",FileName,"rt");
+      infile = FileOpen(modelPath, FileName,"rt");
       i=0;
       while(i<Nsource) {
          fgets(line,512,infile);
@@ -2043,7 +2043,7 @@ void Load1FGL(const char *FileName,double BuckyPf[32][3],
 #undef D2R
 }
 /**********************************************************************/
-void LoadPulsars(const char *FileName,double BuckyPf[32][3],
+void LoadPulsars(const char *modelPath, const char *FileName,double BuckyPf[32][3],
                long BuckyNeighbor[32][6],GLuint PulsarList[32],
                double SkyDistance)
 {
@@ -2073,7 +2073,7 @@ void LoadPulsars(const char *FileName,double BuckyPf[32][3],
 
       for(k=0;k<32;k++) N[k] = 0;
 
-      infile = FileOpen("./Model/",FileName,"rt");
+      infile = FileOpen(modelPath, FileName,"rt");
       i = 0;
       while(!feof(infile)) {
          fgets(line,512,infile);
