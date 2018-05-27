@@ -1729,7 +1729,10 @@ void InitSpacecraft(struct SCType *S)
       }
       else {
          for(Iw=0;Iw<S->Nw;Iw++) {
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Whl[Iw].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Whl[Iw].H,junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                 &S->Whl[Iw].A[0],&S->Whl[Iw].A[1],
@@ -1757,7 +1760,10 @@ void InitSpacecraft(struct SCType *S)
       }
       else {
          for(Im=0;Im<S->Nmtb;Im++) {
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->MTB[Im].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf  %[^\n] %[\n]",
                &S->MTB[Im].Mmax,junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",

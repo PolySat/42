@@ -25,6 +25,8 @@
 ** #endif
 */
 
+#define NAME_MAX_CHARS 128
+
 struct SphereHarmType {
    long Type;
    long N;
@@ -168,6 +170,7 @@ struct JointType {
 };
 
 struct WhlType {
+   char name[NAME_MAX_CHARS]; 
    double H;  /* Angular Momentum, Nms */
    double J;  /* Rotary inertia, kg-m^2 */
    double w;  /* Angular speed, rad/sec */
@@ -183,6 +186,7 @@ struct WhlType {
 };
 
 struct MTBType {
+   char name[NAME_MAX_CHARS];
    double M;
    double A[3]; /* Axis vector wrt Body 0 */
    double Mmax;

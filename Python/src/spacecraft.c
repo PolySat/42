@@ -59,57 +59,65 @@ nasa42_Spacecraft_init(nasa42_Spacecraft *self, PyObject *args, PyObject *kwds)
 }
 
 PyDoc_STRVAR(nasa42_Spacecraft_set_mtb__doc__,
-   "set_mtb(mag_id, mag_mmt) -> None\n\n"
+   "set_mtb(name, mag_mmt) -> None\n\n"
    "Set magnetorquer magnetic moment.");
 
 static PyObject*
 nasa42_Spacecraft_set_mtb(PyObject *self, PyObject *args, PyObject *kwds)
 {
    nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
-   unsigned int id;
+   const char *dev_name;
+   int i = 0;
    double mmt;
 
-   static char *kwlist[] = {"mag_id", "mag_mmt", NULL};
+   static char *kwlist[] = {"name", "mag_mmt", NULL};
 
-   if (!PyArg_ParseTupleAndKeywords(args, kwds, "Id", kwlist, &id, &mmt) ) {
+   if (!PyArg_ParseTupleAndKeywords(args, kwds, "sd", kwlist, &dev_name, &mmt) ) {
       PyErr_SetString(PyExc_RuntimeError, "set_mtb parameters incorrect.");
       return NULL; 
    }
 
-   if (id >= sc->sc->Nmtb) {
-      PyErr_Format(PyExc_ValueError, "Magnetorquer ID %d does not exist.", id);
+   // Find the MTB object by name
+   for (; i < sc->sc->Nmtb && strcmp(sc->sc->MTB[i].name, dev_name); i++) {}
+
+   if (i == sc->sc->Nmtb) {
+      PyErr_Format(PyExc_ValueError, "Magnetorquer device name %s does not exist.", dev_name);
       return NULL;
    }
 
-   sc->sc->FSW.Mmtbcmd[id] = mmt;
+   sc->sc->FSW.Mmtbcmd[i] = mmt;
    Py_INCREF(Py_None);
    return Py_None;
 }
 
 PyDoc_STRVAR(nasa42_Spacecraft_set_wheel__doc__,
-   "set_wheel(whl_id, whl_torque) -> None\n\n"
+   "set_wheel(name, torque) -> None\n\n"
    "Set reaciton wheel torque.");
 
 static PyObject*
 nasa42_Spacecraft_set_wheel(PyObject *self, PyObject *args, PyObject *kwds)
 {
    nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
-   unsigned int id;
+   const char *dev_name;
+   int i = 0;   
    double torque;
    
-   static char *kwlist[] = {"whl_id", "whl_torque", NULL};
+   static char *kwlist[] = {"name", "torque", NULL};
 
-   if (!PyArg_ParseTupleAndKeywords(args, kwds, "Id", kwlist, &id, &torque) ) {
+   if (!PyArg_ParseTupleAndKeywords(args, kwds, "sd", kwlist, &dev_name, &torque) ) {
       PyErr_SetString(PyExc_RuntimeError, "set_mtb parameters incorrect.");
       return NULL; 
    }
-   
-   if (id >= sc->sc->Nw) {
-      PyErr_Format(PyExc_ValueError, "Wheel ID %d does not exist.", id);
+
+   // Find the MTB object by name
+   for (; i < sc->sc->Nw && strcmp(sc->sc->Whl[i].name, dev_name); i++) {}
+
+   if (i == sc->sc->Nw) {
+      PyErr_Format(PyExc_ValueError, "Wheel device name %s does not exist.", dev_name);
       return NULL;
    }
 
-   sc->sc->FSW.Twhlcmd[id] = torque;
+   sc->sc->FSW.Twhlcmd[i] = torque;
    Py_INCREF(Py_None);
    return Py_None;
 }
