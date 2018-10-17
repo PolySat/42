@@ -148,10 +148,10 @@ EXTERN long EndCFD;
 EXTERN SOCKET TxSocket,RxSocket;
 EXTERN long EchoEnabled;
 
-long SimStep(void);
+long SimStep(const char *installedModelPath);
 void Ephemerides(void);
 void OrbitMotion(void);
-void Environment(struct SCType *S);
+void Environment(struct SCType *S, const char *installedModelPath);
 void Perturbations(struct SCType *S);
 void Sensors(struct SCType *S);
 void SensorDriver(struct SCType *S);
@@ -177,8 +177,9 @@ double FindTotalKineticEnergy(struct SCType *S);
 void UpdateScBoundingBox(struct SCType *S);
 void FindCmgAxisAndTrq(struct CMGType *C);
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
-void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
-      float *ElectronEnergy, float *ProtonEnergy, double **Flux); 
+void RadBelt(const char *installedModelPath, float RadiusKm, float MagLatDeg,
+      int NumEnergies, float *ElectronEnergy,
+      float *ProtonEnergy, double **Flux);
 
 /* Debug Function Prototypes */
 void EchoPVel(struct SCType *S);
@@ -188,7 +189,7 @@ void EchoRemAcc(struct SCType *S);
 
 void InitSim(int argc, char **argv);
 void InitOrbits(void);
-void InitSpacecraft(struct SCType *S);
+void InitSpacecraft(struct SCType *S, const char *installedModelDir);
 void LoadPlanets(void);
 long DecodeString(char *s);
 void InitFSW(struct SCType *S);

@@ -22,7 +22,7 @@ long AdvanceTime(void);
 void UpdateScBoundingBox(struct SCType *S);
 void ManageBoundingBoxes(void);
 void ZeroFrcTrq(void);
-long SimStep(void);
+long SimStep(const char *installedModelPath);
 
 #endif
 

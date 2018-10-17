@@ -107,13 +107,15 @@ int Descriptors[4][8];
 int *MapAeMin,*MapApMin,*MapAeMax,*MapApMax;
 
 /******************************************************************************/
-void LoadMapsFromFiles(void)
+void LoadMapsFromFiles(const char *installedModelPath)
 {
       FILE *infile;
       int i;
+      char buff[4096];
             
       /* AEMIN */
-      infile = fopen("./Model/ae8min.txt","rt");
+      sprintf(buff, "%s/ae8min.txt", installedModelPath);
+      infile = fopen(buff, "rt");
       fscanf(infile," %d %d %d %d %d %d %d %d",
          &Descriptors[AE_MIN][0],&Descriptors[AE_MIN][1],
          &Descriptors[AE_MIN][2],&Descriptors[AE_MIN][3],
@@ -125,7 +127,8 @@ void LoadMapsFromFiles(void)
       fclose(infile);
          
       /* APMIN */
-      infile = fopen("./Model/ap8min.txt","rt");
+      sprintf(buff, "%s/ap8min.txt", installedModelPath);
+      infile = fopen(buff, "rt");
       fscanf(infile," %d %d %d %d %d %d %d %d",
          &Descriptors[AP_MIN][0],&Descriptors[AP_MIN][1],
          &Descriptors[AP_MIN][2],&Descriptors[AP_MIN][3],
@@ -137,7 +140,8 @@ void LoadMapsFromFiles(void)
       fclose(infile);
          
       /* AEMAX */
-      infile = fopen("./Model/ae8max.txt","rt");
+      sprintf(buff, "%s/ae8max.txt", installedModelPath);
+      infile = fopen(buff, "rt");
       fscanf(infile," %d %d %d %d %d %d %d %d",
          &Descriptors[AE_MAX][0],&Descriptors[AE_MAX][1],
          &Descriptors[AE_MAX][2],&Descriptors[AE_MAX][3],
@@ -149,7 +153,8 @@ void LoadMapsFromFiles(void)
       fclose(infile);
          
       /* APMAX */
-      infile = fopen("./Model/ap8max.txt","rt");
+      sprintf(buff, "%s/ap8max.txt", installedModelPath);
+      infile = fopen(buff, "rt");
       fscanf(infile," %d %d %d %d %d %d %d %d",
          &Descriptors[AP_MAX][0],&Descriptors[AP_MAX][1],
          &Descriptors[AP_MAX][2],&Descriptors[AP_MAX][3],
@@ -517,8 +522,9 @@ void TRARA1(float FL, float BB0, float *E,float *F,int N, int *DESCR)
 } /* trara1() ends */
                                                           
 /******************************************************************************/
-void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies, 
-      float *ElectronEnergy, float *ProtonEnergy, double **Flux) 
+void RadBelt(const char *installedModelPath, float RadiusKm, float MagLatDeg,
+      int NumEnergies, float *ElectronEnergy,
+      float *ProtonEnergy, double **Flux)
 {
       float Lvalue, BB0;
       float bottomF,altrad, RE, BetaValueF;
@@ -528,7 +534,7 @@ void RadBelt(float RadiusKm, float MagLatDeg, int NumEnergies,
       
       if (First) {
          First = 0;
-         LoadMapsFromFiles();
+         LoadMapsFromFiles(installedModelPath);
          LogFlux = (float *) calloc(NumEnergies,sizeof(float));
       }
 

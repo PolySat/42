@@ -1429,7 +1429,7 @@ void InitFlexModes(struct SCType *S)
       }
 }
 /**********************************************************************/
-void InitSpacecraft(struct SCType *S)
+void InitSpacecraft(struct SCType *S, const char *installedModelPath)
 {
       FILE *infile;
       char junk[120],newline,response[120];
@@ -1979,7 +1979,7 @@ void InitSpacecraft(struct SCType *S)
 /* .. Load geometry */
       for(j=0;j<S->Nb;j++) {
          OldNgeom = Ngeom;
-         Geom = LoadWingsObjFile(ModelPath,S->B[j].GeomFileName,
+         Geom = LoadWingsObjFile(installedModelPath,S->B[j].GeomFileName,
             &Matl,&Nmatl,Geom,&Ngeom,&S->B[j].GeomTag,
             AeroShadowsActive || SolPressShadowsActive);
          if (ContactActive && OldNgeom != Ngeom) LoadOctree(&Geom[Ngeom-1]);
@@ -3000,7 +3000,7 @@ void LoadMinorBodies(const char *installedModelPath)
       fclose(infile);
 }
 /**********************************************************************/
-void LoadRegions(void)
+void LoadRegions(const char *installedModelPath)
 {
       FILE *infile;
       long Ir;
@@ -3065,7 +3065,7 @@ void LoadRegions(void)
          fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
             &R->ElastCoef,&R->DampCoef,&R->FricCoef,junk,&newline);
          fscanf(infile,"%s %[^\n] %[\n]",R->GeomFileName,junk,&newline);
-         Geom = LoadWingsObjFile(ModelPath,R->GeomFileName,
+         Geom = LoadWingsObjFile(installedModelPath,R->GeomFileName,
             &Matl,&Nmatl,Geom,&Ngeom,&R->GeomTag,TRUE);
       }
       fclose(infile);
@@ -3328,7 +3328,7 @@ void InitSim(int argc, char **argv)
       else Nmb = 0;
 
 /* .. Regions */
-      LoadRegions();
+      LoadRegions(installedModelPath);
 
 /* .. Galactic Frame */
       Q2C(qJ2000h,CJ2000H);

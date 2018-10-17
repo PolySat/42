@@ -267,7 +267,7 @@ void TwoSigmaAtmoParam(void)
 }
 
 /**********************************************************************/
-void Environment(struct SCType *S)
+void Environment(struct SCType *S, const char *installedModelPath)
 {
       struct OrbitType *O;
       struct WorldType *P;
@@ -294,7 +294,7 @@ void Environment(struct SCType *S)
          P->DipoleOffset,S->PosN,P->PriMerAng,S->bvn);
       }
       else if (MagModel.Type == IGRF && O->World == EARTH) {
-         IGRFMagField(ModelPath,MagModel.N,MagModel.M,S->PosN,
+         IGRFMagField(installedModelPath,MagModel.N,MagModel.M,S->PosN,
          P->PriMerAng,S->bvn);
       }
       else {
@@ -339,7 +339,7 @@ void Environment(struct SCType *S)
          MxV(World[EARTH].CWN,S->PosN,PosW);
          UNITV(PosW);
          MagLat = asin(VoV(PosW,World[EARTH].DipoleAxis));
-         RadBelt(MAGV(S->PosN)/1000.0,fabs(MagLat)*R2D,NumEnergies,
+         RadBelt(installedModelPath, MAGV(S->PosN)/1000.0,fabs(MagLat)*R2D,NumEnergies,
             ElectronEnergy,ProtonEnergy,Flux);
       }
 

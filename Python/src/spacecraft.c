@@ -355,7 +355,7 @@ static PyMethodDef nasa42_Spacecraft_methods[] = {
 
 static PyGetSetDef nasa42_Spacecraft_getset[] = {
    {"quaternion", nasa42_Spacecraft_quaternion, NULL, "Satellite quaternion from ECI to Body.", NULL},   
-   {"ang_vel", nasa42_Spacecraft_ang_vel, NULL, "Angular velocity of Body in Body Frame (rads/s).", NULL},   
+   {"ang_vel", nasa42_Spacecraft_ang_vel, NULL, "Angular velocity of Body in Inertial Frame (rads/s).", NULL},
    {"dcm_lvlh_inertial", nasa42_Spacecraft_dcm_lvlh_inertial, NULL, "Rotation matrix from inertial to lvlh frame.", NULL},   
    {NULL, NULL, NULL, NULL, NULL}
 };

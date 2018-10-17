@@ -25,6 +25,10 @@
 extern int HandoffToGui(int argc, char **argv);
 extern long (*SimStepCB)(void);
 
+static PyObject *stepCB = NULL;
+static PyObject *stepCB_sim = NULL;
+static char *model_dir;
+
 static void
 nasa42_Simulation_dealloc(nasa42_Simulation *self)
 {
@@ -40,7 +44,7 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    PyObject *sc_args = NULL, *directory = NULL, *nasa42_data = NULL;
    long Isc;
    char *argv[] = {"python-nasa42", NULL, NULL, NULL, NULL};
-   char *data_dir, *model_dir = NULL;
+   char *data_dir;
    unsigned int i;
    int res, len;
 
@@ -71,7 +75,7 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    InitSim(4, argv);
    for (Isc=0;Isc<Nsc;Isc++) {
       if (SC[Isc].Exists) {
-         InitSpacecraft(&SC[Isc]);
+         InitSpacecraft(&SC[Isc], model_dir);
          InitFSW(&SC[Isc]);
       }
    }
@@ -107,9 +111,6 @@ error:
    return -1;
 }
 
-static PyObject *stepCB = NULL;
-static PyObject *stepCB_sim = NULL;
-
 static long nasa42_Simulation_SimStepCB(void)
 {
    if (stepCB) {
@@ -136,7 +137,7 @@ static long nasa42_Simulation_SimStepCB(void)
 
       return res;
    }
-   return SimStep();
+   return SimStep(model_dir);
 }
 
 static PyObject*
@@ -218,7 +219,7 @@ nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
 
    /* Crunch numbers till done */
    while(stop_time > AbsTime)
-      SimStep();
+      SimStep(model_dir);
 
    Py_INCREF(Py_None);
    return Py_None;
@@ -229,7 +230,7 @@ nasa42_Simulation_SimStep(PyObject *self, PyObject *args, PyObject *kwds)
 {
     long done;
 
-    done = SimStep();
+    done = SimStep(model_dir);
 
     return PyLong_FromLong(done);
 }

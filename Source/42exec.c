@@ -213,7 +213,7 @@ void ZeroFrcTrq(void)
       }
 }
 /**********************************************************************/
-long SimStep(void)
+long SimStep(const char *installedModelPath)
 {
       long Isc;
       static long First = 1;
@@ -236,7 +236,7 @@ long SimStep(void)
          for(Isc=0;Isc<Nsc;Isc++) {
             S = &SC[Isc];
             if (S->Exists) {
-               Environment(S);    /* Magnetic Field, Atmospheric Density */
+               Environment(S, installedModelPath);  /* Magnetic Field, Atmospheric Density */
                Perturbations(S);  /* Environmental Forces and Torques */
                Sensors(S);
                FlightSoftWare(S);
@@ -272,7 +272,7 @@ long SimStep(void)
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
          if (S->Exists) {
-            Environment(S);    /* Magnetic Field, Atmospheric Density */
+            Environment(S, installedModelPath);    /* Magnetic Field, Atmospheric Density */
             Perturbations(S);  /* Environmental Forces and Torques */
             Sensors(S);
             FlightSoftWare(S);
@@ -303,11 +303,14 @@ int exec(int argc,char **argv)
       long Isc;
       long Done = 0;
       int consumedArgs = 0;
+      char *installedModelPath = "./Model";
+
+      if (argc > 3) installedModelPath = argv[3];
 
       InitSim(argc,argv);
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
-            InitSpacecraft(&SC[Isc]);
+            InitSpacecraft(&SC[Isc], installedModelPath);
             InitFSW(&SC[Isc]);
          }
       }
@@ -326,13 +329,13 @@ int exec(int argc,char **argv)
          if (GLEnable) HandoffToGui(argc - consumedArgs, &argv[consumedArgs]);
          else {
             while(!Done) {
-               Done = SimStep();
+               Done = SimStep(installedModelPath);
             }
          }
       #else
          /* Crunch numbers till done */
          while(!Done) {
-            Done = SimStep();
+            Done = SimStep(installedModelPath);
          }
       #endif
 
