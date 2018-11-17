@@ -101,6 +101,9 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
       PyList_SET_ITEM(self->sc_list, i, (PyObject *)sc);
    }
 
+   /* Step simulation once so all values are properly initialized */
+   SimTime -= DTSIM;
+   SimStep(model_dir);
    return 0;
 
 error:
@@ -213,7 +216,7 @@ nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
    // Convert stop time to J2000
    stop_time += UNIX_EPOCH;
    if (stop_time <= AbsTime) {
-      PyErr_SetString(PyExc_ValueError, "Stop time must be greated than current sim time.");
+      PyErr_SetString(PyExc_ValueError, "Stop time must be greater than current sim time.");
       return NULL;
    }
 
