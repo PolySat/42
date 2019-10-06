@@ -14,6 +14,8 @@ Features
     - Rigorous and full-featured to support full spacecraft life cycle
 
 ## Polysat Install
+Run `mkdir Object`
+
 Install glut with `sudo apt install freeglut3-dev`
 
 Make with `sudo make python`
