@@ -13,3 +13,7 @@ Features
     - Fast setup for concept studies
     - Rigorous and full-featured to support full spacecraft life cycle
 
+## Polysat Install
+Install glut with `sudo apt install freeglut3-dev`
+
+Make with `sudo make python`
