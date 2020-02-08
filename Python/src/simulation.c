@@ -62,7 +62,7 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    data_dir = PyUnicode_AsUTF8AndSize(directory, &size);
    if (!data_dir)
       goto error;
-   
+
    len = strlen(data_dir);
    model_dir = malloc(len + strlen("/Model") + 1);
    if (!model_dir)
@@ -76,14 +76,13 @@ nasa42_Simulation_init(nasa42_Simulation *self, PyObject *args)
    for (Isc=0;Isc<Nsc;Isc++) {
       if (SC[Isc].Exists) {
          InitSpacecraft(&SC[Isc], model_dir);
-         InitFSW(&SC[Isc]);
       }
    }
 
    self->sc_list = PyList_New((Py_ssize_t)Nsc);
    if (!self->sc_list)
       goto error;
-   
+
    for (i = 0; i < Nsc; i++) {
       sc = PyObject_New(nasa42_Spacecraft, &nasa42_SpacecraftType);
       if (!sc)
@@ -149,19 +148,19 @@ nasa42_Simulation_startGUI(PyObject *self, PyObject *args, PyObject *kwds)
    char *argv[] = { "42", NULL, NULL, NULL, NULL }, modelPath[4096], shaderPath[4096], worldPath[4096];
    PyObject *temp, *nasa42_data, *directory;
    char *data_dir;
-   Py_ssize_t size;   
+   Py_ssize_t size;
 
    static char *kwlist[] = {"step_callback", NULL};
    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", kwlist, &temp) ) {
       PyErr_SetString(PyExc_RuntimeError, "Must provide step method callback.");
-      return NULL; 
+      return NULL;
    }
    if (stepCB)
       Py_XDECREF(stepCB);
 
    if (temp && !PyCallable_Check(temp)) {
       PyErr_SetString(PyExc_RuntimeError, "Must provide a method to callback.");
-      return NULL; 
+      return NULL;
    }
 
    // Setup use callback
@@ -210,7 +209,7 @@ nasa42_Simulation_propagate(PyObject *self, PyObject *args, PyObject *kwds)
    static char *kwlist[] = {"stop_time", NULL};
    if (!PyArg_ParseTupleAndKeywords(args, kwds, "d", kwlist, &stop_time) ) {
       PyErr_SetString(PyExc_RuntimeError, "Must provide propagation stop time.");
-      return NULL; 
+      return NULL;
    }
 
    // Convert stop time to J2000
@@ -252,7 +251,7 @@ static PyMethodDef nasa42_Simulation_methods[] = {
 };
 
 static PyGetSetDef nasa42_Simulation_getset[] = {
-   {"epoch", nasa42_Simulation_epoch, NULL, "Current simulation epoch time.", NULL},   
+   {"epoch", nasa42_Simulation_epoch, NULL, "Current simulation epoch time.", NULL},
    {NULL, NULL, NULL, NULL, NULL}
 };
 

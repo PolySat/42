@@ -418,10 +418,12 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       double Epoch,AbsTime;
 
       strncpy(YearString,&Line1[18],2);
+      YearString[2] = 0;
       year = (long) atoi(YearString);
       if (year < 57) year += 2000;
       else year += 1900;
       strncpy(DOYstring,&Line1[20],12);
+      DOYstring[12] = 0;
       FloatDOY = (double) atof(DOYstring);
       DOY = (long) FloatDOY;
       FracDay = FloatDOY - ((double) DOY);
@@ -432,21 +434,27 @@ void TLE2Eph(const char Line1[80], const char Line2[80], double JD,
       AbsTime = JDToAbsTime(JD);
 
       strncpy(IncString,&Line2[8],8);
+      IncString[8] = 0;
       *i = ((double) atof(IncString))*D2R;
 
       strncpy(RAANstring,&Line2[17],9);
+      RAANstring[9] = 0;
       *RAAN = ((double) atof(RAANstring))*D2R;
 
       strncpy(EccString,&Line2[26],7);
+      EccString[7] = 0;
       *e = ((double) atof(EccString))*1.0E-7;
 
       strncpy(omgstring,&Line2[34],8);
+      omgstring[8] = 0;
       *ArgP = ((double) atof(omgstring))*D2R;
 
       strncpy(MeanAnomString,&Line2[43],8);
+      MeanAnomString[8] = 0;
       MeanAnom = ((double) atof(MeanAnomString))*D2R;
 
       strncpy(MeanMotionString,&Line2[52],11);
+      MeanMotionString[11] = 0;
       *MeanMotion = ((double) atof(MeanMotionString))*TWOPI/86400.0;
       *Period = TWOPI/(*MeanMotion);
 
@@ -552,15 +560,15 @@ double RV2RVp(double mu, double r[3], double v[3], double rp[3], double vp[3])
       return(anom);
 }
 /**********************************************************************/
-/*  This function finds the mean orbit of planet "i", and its         */
-/*  position and velocity.  Ref. Chap 31 of Meeus, "Astronomical      */
-/*  Algorithms", second edition, QB51.3.E43, M42, 1998.               */
+/*  This function finds the mean orbit of planet "i" with respect to  */
+/*  the mean-equinox-of-date frame.  Ref. Chap 31 of Meeus,           */
+/*  "Astronomical Algorithms", second edition, QB51.3.E43, M42, 1998. */
 /*  Index 1=Mercury, 2=Venus, ... 9=Pluto.  0=Sun is not used.        */
 /*  Note that the elements for Pluto are not from Meeus, but from a   */
 /*  lower-fidelity data set from JPL.                                 */
 void PlanetEphemerides(long i, double JD, double mu,
        double *SMA, double *ecc, double *inc, double *RAAN, double *ArgP,
-		 double *tp, double *anom, double *SLR, double *alpha, double *rmin,
+       double *tp, double *anom, double *SLR, double *alpha, double *rmin,
        double *MeanMotion, double *Period)
 {
 #define TWOPI (6.283185307179586)
@@ -2526,7 +2534,39 @@ void FindLightLagOffsets(double AbsTime, struct OrbitType *Observer,
 
 #undef SPEED_OF_LIGHT
 }
+/**********************************************************************/
+void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
+{
+#define TWOPI (6.283185307179586)
+      double p2,Coef,e2,e4,sin2i,n;
+      
+      n = sqrt(mu/O->SMA/O->SMA/O->SMA);
+      p2 = O->SLR*O->SLR;
+      Coef = 1.5*J2*Rw*Rw/p2;
+      e2 = O->ecc*O->ecc;
+      e4 = e2*e2;
+      sin2i = sin(O->inc)*sin(O->inc);
 
+/* .. Regression of Ascending Node */
+      O->RAANdot = -Coef*n*cos(O->inc);
+
+/* .. Precession of Periapsis */
+      O->ArgPdot = Coef*n*(2.0-2.5*sin2i);
+      
+/* .. Avg Radial Accel (positive toward zenith) */
+      O->J2Fr0 = -Coef*mu/p2*(1.0+3.0*e2+0.375*e4-1.5*sin2i*(1.0-cos(2.0*O->ArgP)*(1.5*e2+0.25*e4)));
+/* .. Amplitude for orbit-rate orbit-normal accel */
+      O->J2Fh1 = -2.0*Coef*mu/p2*cos(O->inc)*sin(O->inc);
+
+/* .. Effective Mu */
+      O->MuPlusJ2 = O->mu - O->SMA*O->SMA*O->J2Fr0;
+
+/* .. Adjust mean motion, period */
+      O->MeanMotion = sqrt(O->MuPlusJ2/O->SMA/O->SMA/O->SMA);
+      O->Period = TWOPI/O->MeanMotion;
+      
+#undef TWOPI
+}
 
 /* #ifdef __cplusplus
 ** }

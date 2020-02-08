@@ -15,6 +15,10 @@
 #ifndef __MATHKIT_H__
 #define __MATHKIT_H__
 
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+
 /*
 ** #ifdef __cplusplus
 ** namespace Kit {
@@ -41,7 +45,9 @@ void VxMT (double V[3], double M[3][3], double W[3]);
 void MTxV (double M[3][3], double V[3], double W[3]);
 void SxV(double S, double V[3], double W[3]);
 void SxM(double S, double A[3][3], double B[3][3]);
-void MINV(double A[3][3], double B[3][3]);
+void MINV4(double A[4][4], double B[4][4]);
+void MINV3(double A[3][3], double B[3][3]);
+void MINV2(double A[2][2], double B[2][2]);
 void PINV4x3(double A[4][3], double Aplus[3][4]);
 void MT(double A[3][3], double B[3][3]);
 double VoV(double A[3], double B[3]);
@@ -80,6 +86,7 @@ void MxVG(double **M, double *v, double *w, long n, long m);
 void SxMG(double s, double **A, double **B,
           long N, long M);
 void MINVG(double **A, double **AI, long N);
+void FastMINV6(double A[6][6], double AI[6][6], long N);
 void PINVG(double **A, double **Ai, long n, long m);
 double **CreateMatrix(long n, long m);
 void DestroyMatrix(double **A, long n);
@@ -107,6 +114,11 @@ long ProjectPointOntoPoly(double Point[3], double DirVec[3],
 long ProjectPointOntoTriangle(double A[3], double B[3], double C[3],
       double DirVec[3], double Pt[3], double ProjPt[3], double Bary[4]);
 double CubicSpline(double x, double X[4], double Y[4]);
+void ChebyPolys(double u, long n, double T[20], double U[20]); 
+void ChebyInterp(double T[20], double U[20], double Coef[20], long n, 
+   double *P, double *dPdu);
+void FindChebyCoefs(double *u, double *P, long Nu, long Nc, double Coef[20]);
+void VecToLngLat(double A[3], double *lng, double *lat);
 
 /*
 ** #ifdef __cplusplus

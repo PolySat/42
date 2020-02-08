@@ -12,9 +12,6 @@
 /*    All Other Rights Reserved.                                      */
 
 
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
 #include "mathkit.h"
 
 /* #ifdef __cplusplus
@@ -156,9 +153,44 @@ void SxM(double S, double A[3][3], double B[3][3])
       B[2][1] = S*A[2][1];
       B[2][2] = S*A[2][2];
 }
-/**********************************************************************/
-/*  Inverse of a 3x3 Matrix                                           */
-void MINV(double A[3][3], double B[3][3])
+/******************************************************************************/
+/* Inverse of a 4x4 Matrix                                                    */
+void MINV4(double A[4][4],double B[4][4])
+{
+      double DET = 0.0;
+      long r,s,i,j,k,x,y,z;
+      
+      for(r=0;r<4;r++) {
+         for(s=0;s<4;s++) {
+            i = (r+1)%4;
+            j = (r+2)%4;
+            k = (r+3)%4;
+            x = (s+1)%4;
+            y = (s+2)%4;
+            z = (s+3)%4;
+            B[s][r] =  A[i][x]*(A[j][y]*A[k][z]-A[j][z]*A[k][y])
+                      +A[i][y]*(A[j][z]*A[k][x]-A[j][x]*A[k][z])
+                      +A[i][z]*(A[j][x]*A[k][y]-A[j][y]*A[k][x]);
+            if ((r+s)%2 == 1) B[s][r] = -B[s][r];
+         }
+      }
+      for(r=0;r<4;r++) DET += A[0][r]*B[r][0];
+
+      if (DET == 0.0) {
+         printf("Attempted inversion of singular matrix in MINV4.  Bailing out.\n");
+         exit(1);
+      }
+      else {
+         for(r=0;r<4;r++) {
+            for(s=0;s<4;s++) {
+               B[r][s] /= DET;
+            }
+         }
+      }
+}
+/******************************************************************************/
+/*  Inverse of a 3x3 Matrix                                                   */
+void MINV3(double A[3][3], double B[3][3])
 {
       double DET;
 
@@ -167,19 +199,39 @@ void MINV(double A[3][3], double B[3][3])
          -A[2][1]*A[1][2]*A[0][0]-A[2][2]*A[1][0]*A[0][1];
 
       if (DET == 0.0) {
-         printf("Attempted inversion of singular matrix in MINV.  Bailing out.");
+         printf("Attempted inversion of singular matrix in MINV3.  Bailing out.\n");
          exit(1);
       }
-
-      B[0][0]=(A[1][1]*A[2][2]-A[2][1]*A[1][2])/DET;
-      B[0][1]=(A[2][1]*A[0][2]-A[0][1]*A[2][2])/DET;
-      B[0][2]=(A[0][1]*A[1][2]-A[1][1]*A[0][2])/DET;
-      B[1][0]=(A[2][0]*A[1][2]-A[1][0]*A[2][2])/DET;
-      B[1][1]=(A[0][0]*A[2][2]-A[2][0]*A[0][2])/DET;
-      B[1][2]=(A[1][0]*A[0][2]-A[0][0]*A[1][2])/DET;
-      B[2][0]=(A[1][0]*A[2][1]-A[2][0]*A[1][1])/DET;
-      B[2][1]=(A[2][0]*A[0][1]-A[0][0]*A[2][1])/DET;
-      B[2][2]=(A[0][0]*A[1][1]-A[1][0]*A[0][1])/DET;
+      else {
+         B[0][0]=(A[1][1]*A[2][2]-A[2][1]*A[1][2])/DET;
+         B[0][1]=(A[2][1]*A[0][2]-A[0][1]*A[2][2])/DET;
+         B[0][2]=(A[0][1]*A[1][2]-A[1][1]*A[0][2])/DET;
+         B[1][0]=(A[2][0]*A[1][2]-A[1][0]*A[2][2])/DET;
+         B[1][1]=(A[0][0]*A[2][2]-A[2][0]*A[0][2])/DET;
+         B[1][2]=(A[1][0]*A[0][2]-A[0][0]*A[1][2])/DET;
+         B[2][0]=(A[1][0]*A[2][1]-A[2][0]*A[1][1])/DET;
+         B[2][1]=(A[2][0]*A[0][1]-A[0][0]*A[2][1])/DET;
+         B[2][2]=(A[0][0]*A[1][1]-A[1][0]*A[0][1])/DET;
+      }
+}
+/******************************************************************************/
+/*  Inverse of a 2x2 Matrix                                                   */
+void MINV2(double A[2][2], double B[2][2])
+{
+      double DET;
+      
+      DET = A[0][0]*A[1][1] - A[1][0]*A[0][1];
+      
+      if (DET == 0.0) {
+         printf("Attempted inversion of singular matrix in MINV2.  Bailing out.\n");
+         exit(1);
+      }
+      else {
+         B[0][0]= A[1][1]/DET;
+         B[0][1]=-A[0][1]/DET;
+         B[1][0]=-A[1][0]/DET;
+         B[1][1]= A[0][0]/DET;
+      }
 }
 /**********************************************************************/
 /*  Pseudo-inverse of a 4x3 matrix                                    */
@@ -206,7 +258,7 @@ void PINV4x3(double A[4][3], double Aplus[3][4])
       AtA[2][2]=A[0][2]*A[0][2]+A[1][2]*A[1][2]
                +A[2][2]*A[2][2]+A[3][2]*A[3][2];
 
-      MINV(AtA,AtAi);
+      MINV3(AtA,AtAi);
 
       Aplus[0][0]=AtAi[0][0]*A[0][0]+AtAi[0][1]*A[0][1]+AtAi[0][2]*A[0][2];
       Aplus[0][1]=AtAi[0][0]*A[1][0]+AtAi[0][1]*A[1][1]+AtAi[0][2]*A[1][2];
@@ -469,7 +521,7 @@ void UNITQ(double Q[4])
 
       A=sqrt(Q[0]*Q[0]+Q[1]*Q[1]+Q[2]*Q[2]+Q[3]*Q[3]);
       if (A == 0.0) {
-         printf("Divide by zero in UNITQ.  You'll want to fix that.\n");
+         printf("Divide by zero in UNITQ (Line %d of mathkit.c).  You'll want to fix that.\n",__LINE__);
          exit(1);
       }
       else {
@@ -596,8 +648,7 @@ void Legendre(long N, long M, double x,
 /* gradV[2] = Longitudinal (positive east)                            */
 void SphericalHarmonics(long N, long M, double r, double phi,
         double theta, double Re, double K,
-        double C[NMAX+1][NMAX+1], double S[NMAX+1][NMAX+1],
-        double gradV[3])
+        double C[NMAX+1][NMAX+1], double S[NMAX+1][NMAX+1],double gradV[3])
 {
 
       double P[NMAX+1][NMAX+1],sdP[NMAX+1][NMAX+1];
@@ -801,6 +852,68 @@ void MINVG(double **A, double **AI, long N)
       free(TA);
       free(TB);
 }
+/******************************************************************************/
+/* For Order-N dynamics, we need to invert matrices of size 1 <= N <= 6       */
+/* This specialized function avoids mallocs to save time                      */
+void FastMINV6(double A[6][6], double AI[6][6], long N)
+{
+      long I,J,ROW;
+      long IPIVOT = 0;
+      double M[6][6];
+      double PIVOT,K,TA[6],TB[6];
+
+
+      for(I=0;I<N;I++){
+         for(J=0;J<N;J++){
+            M[I][J] = A[I][J];
+            AI[I][J] = 0.0;
+         }
+         AI[I][I] = 1.0;
+      }
+
+      for(ROW=0;ROW<N;ROW++){
+         PIVOT = M[ROW][ROW];
+         IPIVOT = ROW;
+         for(I=ROW+1;I<N;I++){
+            if (fabs(M[I][ROW]) > fabs(PIVOT)){
+               PIVOT = M[I][ROW];
+               IPIVOT = I;
+            }
+         }
+         if (PIVOT == 0.0){
+            printf("Matrix is singular in FastMINV6\n");
+            exit(1);
+         }
+
+         for(J=0;J<N;J++){
+            TA[J] = M[IPIVOT][J];
+            TB[J] = AI[IPIVOT][J];
+            M[IPIVOT][J] = M[ROW][J];
+            AI[IPIVOT][J] = AI[ROW][J];
+            M[ROW][J] = TA[J] / PIVOT;
+            AI[ROW][J] = TB[J] / PIVOT;
+         }
+         for(I=ROW+1;I<N;I++){
+            K = M[I][ROW];
+            for(J=0;J<N;J++){
+               M[I][J] = M[I][J] - K * M[ROW][J];
+               AI[I][J] = AI[I][J] - K * AI[ROW][J];
+            }
+         }
+      }
+
+/*    M is now upper diagonal */
+
+      for(ROW=N-1;ROW>0;ROW--){
+         for(I=0;I<ROW;I++){
+            K = M[I][ROW];
+            for(J=0;J<N;J++){
+               M[I][J] = M[I][J] - K * M[ROW][J];
+               AI[I][J] = AI[I][J] - K * AI[ROW][J];
+            }
+         }
+      }
+}
 /**********************************************************************/
 /*  Find the pseudo-inverse of an n-by-m matrix A                     */
 void PINVG(double **A, double **Ai, long n, long m)
@@ -925,6 +1038,8 @@ void LINSOLVE(double **A, double *x, double *b, long n)
 /*  This method can only be used if A is positive definite            */
 /*  (symmetric), but it is roughly twice as fast as Gaussian          */
 /*  Elimination.                                                      */
+/*  In testing, this didn't live up to the hype, being slightly       */
+/*  slower than LINSOLVE.  I must have an inefficiency.               */               
 void CholeskySolve(double **A, double *x, double *b, long n)
 {
       double **L, *D, **LD;
@@ -1609,7 +1724,102 @@ double CubicSpline(double x, double X[4], double Y[4])
 
       return(a+u*(b+u*(c+u*d)));
 }
-
+/******************************************************************************/
+/* Compute Chebyshev polynomials of first kind (T) and second kind (U)        */
+void ChebyPolys(double u, long n, double T[20], double U[20]) 
+{
+      long k;
+      
+      if (u < -1.0 || u > 1.0) {
+         printf("u out of range in ChebPolys.  Bailing out.\n");
+         exit(1);
+      }
+      if (n > 20) {
+         printf("n out of range in ChebPolys.  Bailing out.\n");
+         exit(1);
+      }
+      
+      T[0] = 1.0;
+      T[1] = u;
+      U[0] = 1.0;
+      U[1] = 2.0*u;
+      for(k=1;k<n-1;k++) {
+         T[k+1] = 2.0*u*T[k] - T[k-1];
+         U[k+1] = 2.0*u*U[k] - U[k-1];
+      }
+}
+/******************************************************************************/
+/* Using ChebyPolys, find "position" (P) and scaled velocity (dPdu)           */
+void ChebyInterp(double T[20], double U[20], double Coef[20], long n, 
+   double *P, double *dPdu)
+{
+      long k;
+      
+      if (n > 20) {
+         printf("n out of range in ChebyInterp.  Bailing out.\n");
+         exit(1);
+      }
+      
+      *P = Coef[0]*T[0];
+      *dPdu = 0.0;
+      for(k=1;k<n;k++) {
+         *P += Coef[k]*T[k];
+         *dPdu += Coef[k]*((double) k)*U[k-1];
+      }
+}
+/******************************************************************************/
+void FindChebyCoefs(double *u, double *P, long Nu, long Nc, double Coef[20])
+{
+      long i,j,k;
+      double T[20],U[20];
+      double **AtA, *x, *Atb;
+      
+      if (Nc > 20) {
+         printf("Nc out of range in FindChebyCoefs.  Bailing out.\n");
+         exit(1);
+      }
+      
+      AtA = CreateMatrix(Nc,Nc);
+      x = (double *) calloc(Nc,sizeof(double));
+      Atb = (double *) calloc(Nc,sizeof(double));
+      
+      for(k=0;k<Nu;k++) {
+         ChebyPolys(u[k],Nc,T,U);
+         for(i=0;i<Nc;i++) {
+            for(j=0;j<Nc;j++) {
+               AtA[i][j] += T[i]*T[j];
+            }
+            Atb[i] += T[i]*P[k];
+         }
+      }
+      LINSOLVE(AtA,x,Atb,Nc);
+      for(i=0;i<Nc;i++) Coef[i] = x[i];
+      for(i=Nc;i<20;i++) Coef[i] = 0.0;
+      
+      DestroyMatrix(AtA,Nc);
+      free(x);
+      free(Atb);
+      
+}
+/******************************************************************************/
+void VecToLngLat(double A[3], double *lng, double *lat)
+{
+      double B[3];
+      
+      if (MAGV(A) > 0.0) {
+         CopyUnitV(A,B);
+      
+         *lng = atan2(B[1],B[0]);
+      
+         if (fabs(B[2]) < 1.0) *lat = asin(B[2]);
+         else if (B[2] > 0.0) *lat = 2.0*atan(1.0);
+         else *lat = -2.0*atan(1.0);
+      }
+      else {
+         *lng = 0.0;
+         *lat = 0.0;
+      }
+}
 /* #ifdef __cplusplus
 ** }
 ** #endif

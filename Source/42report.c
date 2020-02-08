@@ -77,79 +77,41 @@ double FindTotalUnshadedProjectedArea(struct SCType *S,double VecN[3])
       return(ProjArea);
 }
 /*********************************************************************/
-void CmgReport(void)
+void MagReport(void)
 {
-      struct SCType *S;
-      static FILE *Hvnfile;
-      static FILE *Hvbfile;
-      static FILE *CmgAngfile;
-      static FILE *Tcmgfile;
+      static FILE *magfile;
       static long First = 1;
-      double Tcmg[3];
-      long i;
-
+      
       if (First) {
          First = 0;
-         Hvnfile = FileOpen(InOutPath,"Hvn.42","w");
-         Hvbfile = FileOpen(InOutPath,"Hvb.42","w");
-         CmgAngfile = FileOpen(InOutPath,"ang.42","w");
-         Tcmgfile = FileOpen(InOutPath,"Tcmg.42","w");
+         magfile = FileOpen(InOutPath,"MagBVB.42","wt");
       }
-
-      if (OutFlag) {
-         S = &SC[0];
-         fprintf(Hvnfile,"%lf %lf %lf\n",S->Hvn[0],S->Hvn[1],S->Hvn[2]);
-         fprintf(Hvbfile,"%lf %lf %lf\n",S->Hvb[0],S->Hvb[1],S->Hvb[2]);
-         fprintf(CmgAngfile,"%lf %lf %lf %lf\n",
-            S->CMG[0].ang[0]*R2D,S->CMG[1].ang[0]*R2D,
-            S->CMG[2].ang[0]*R2D,S->CMG[3].ang[0]*R2D);
-         Tcmg[0] = 0.0;
-         Tcmg[1] = 0.0;
-         Tcmg[2] = 0.0;
-         for(i=0;i<S->Ncmg;i++) {
-            Tcmg[0] += S->CMG[i].Trq[0];
-            Tcmg[1] += S->CMG[i].Trq[1];
-            Tcmg[2] += S->CMG[i].Trq[2];
-         }
-         fprintf(Tcmgfile,"%lf %lf %lf\n",Tcmg[0],Tcmg[1],Tcmg[2]);
-      }
+      
+      fprintf(magfile,"%le %le %le %le %le %le %le %le %le \n",
+         SC[0].bvb[0],SC[0].bvb[1],SC[0].bvb[2],
+         SC[0].MAG[0].Field,SC[0].MAG[1].Field,SC[0].MAG[2].Field,
+         SC[0].AC.bvb[0],SC[0].AC.bvb[1],SC[0].AC.bvb[2]);
+      
 }
 /*********************************************************************/
-void PotatoReport(void)
+void GyroReport(void)
 {
-      static FILE *Bodywnfile,*Bodyqnfile;
-      static FILE *Bodyvnfile,*Bodypnfile;
-      struct SCType *S;
-      struct BodyType *B;
-      long Ib;
+      static FILE *gyrofile;
       static long First = 1;
-
+      
       if (First) {
          First = 0;
-         Bodywnfile = FileOpen(InOutPath,"Bodywn.42","w");
-         Bodyqnfile = FileOpen(InOutPath,"Bodyqn.42","w");
-         Bodyvnfile = FileOpen(InOutPath,"Bodyvn.42","w");
-         Bodypnfile = FileOpen(InOutPath,"Bodypn.42","w");
+         gyrofile = FileOpen(InOutPath,"Gyro.42","wt");
       }
-
-      if (OutFlag) {
-         S = &SC[0];
-         for(Ib=0;Ib<S->Nb;Ib++) {
-            B = &S->B[Ib];
-            fprintf(Bodywnfile,"%lf %lf %lf ",
-               B->wn[0],B->wn[1],B->wn[2]);
-            fprintf(Bodyqnfile,"%lf %lf %lf %lf ",
-               B->qn[0],B->qn[1],B->qn[2],B->qn[3]);
-            fprintf(Bodyvnfile,"%lf %lf %lf ",
-               B->vn[0],B->vn[1],B->vn[2]);
-            fprintf(Bodypnfile,"%lf %lf %lf ",
-               B->pn[0],B->pn[1],B->pn[2]);
-         }
-         fprintf(Bodywnfile,"\n");
-         fprintf(Bodyqnfile,"\n");
-         fprintf(Bodyvnfile,"\n");
-         fprintf(Bodypnfile,"\n");
-      }
+      
+      fprintf(gyrofile,"%le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le %le \n",
+         SC[0].B[0].wn[0],SC[0].B[0].wn[1],SC[0].B[0].wn[2],
+         SC[0].Gyro[0].TrueRate,SC[0].Gyro[1].TrueRate,SC[0].Gyro[2].TrueRate,
+         SC[0].Gyro[0].Bias,SC[0].Gyro[1].Bias,SC[0].Gyro[2].Bias,
+         SC[0].Gyro[0].Angle,SC[0].Gyro[1].Angle,SC[0].Gyro[2].Angle,
+         SC[0].Gyro[0].MeasRate,SC[0].Gyro[1].MeasRate,SC[0].Gyro[2].MeasRate,
+         SC[0].AC.wbn[0],SC[0].AC.wbn[1],SC[0].AC.wbn[2]);
+      
 }
 /*********************************************************************/
 void Report(void)
@@ -162,14 +124,17 @@ void Report(void)
       static FILE *PosRfile,*VelRfile;
       static FILE *Hvnfile,*KEfile;
       static FILE *RPYfile;
+      static FILE *Hwhlfile;
+      static FILE *MTBfile;
       static FILE *ProjAreaFile;
+      static FILE *AccFile;
       static char First = TRUE;
       long Isc,i;
       struct DynType *D;
       double CBL[3][3],Roll,Pitch,Yaw;
       double PosW[3],VelW[3],PosR[3],VelR[3];
       char s[40];
-      double ZAxis[3] = {0.0,0.0,1.0};
+      //double ZAxis[3] = {0.0,0.0,1.0};
 
       if (First) {
          First = FALSE;
@@ -211,6 +176,9 @@ void Report(void)
          KEfile = FileOpen(InOutPath,"KE.42","w");
          ProjAreaFile = FileOpen(InOutPath,"ProjArea.42","w");
          RPYfile = FileOpen(InOutPath,"RPY.42","w");
+         Hwhlfile = FileOpen(InOutPath,"Hwhl.42","w");
+         MTBfile = FileOpen(InOutPath,"MTB.42","w");
+         AccFile = FileOpen(InOutPath,"Acc.42","w");
       }
 
       if (OutFlag) {
@@ -248,12 +216,20 @@ void Report(void)
                PosW[0],PosW[1],PosW[2]);
             fprintf(VelWfile,"%18.12le %18.12le %18.12le ",
                VelW[0],VelW[1],VelW[2]);
-            MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
-            MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
-            fprintf(PosRfile,"%le %le %le\n",
-               PosR[0],PosR[1],PosR[2]);
-            fprintf(VelRfile,"%le %le %le\n",
-               VelR[0],VelR[1],VelR[2]);
+            if (Orb[SC[0].RefOrb].Regime == ORB_FLIGHT) {
+               MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].PosR,PosR);
+               MxV(Rgn[Orb[SC[0].RefOrb].Region].CN,SC[0].VelR,VelR);
+               fprintf(PosRfile,"%le %le %le\n",
+                  PosR[0],PosR[1],PosR[2]);
+               fprintf(VelRfile,"%le %le %le\n",
+                  VelR[0],VelR[1],VelR[2]);
+            }
+            else {
+               fprintf(PosRfile,"%le %le %le\n",
+                  SC[0].PosR[0],SC[0].PosR[1],SC[0].PosR[2]);
+               fprintf(VelRfile,"%le %le %le\n",
+                  SC[0].VelR[0],SC[0].VelR[1],SC[0].VelR[2]);
+            }
             fprintf(qbnfile,"%le %le %le %le\n",
                SC[0].B[0].qn[0],SC[0].B[0].qn[1],SC[0].B[0].qn[2],SC[0].B[0].qn[3]);
             fprintf(wbnfile,"%le %le %le\n",
@@ -267,12 +243,28 @@ void Report(void)
             MxMT(SC[0].B[0].CN,SC[0].CLN,CBL);
             C2A(123,CBL,&Roll,&Pitch,&Yaw);
             fprintf(RPYfile,"%lf %lf %lf\n",Roll*R2D,Pitch*R2D,Yaw*R2D);
+            for(i=0;i<SC[0].Nw;i++) fprintf(Hwhlfile,"%lf ",SC[0].Whl[i].H);
+            fprintf(Hwhlfile,"\n");
+            if (SC[0].Nmtb > 0) {
+               for(i=0;i<SC[0].Nmtb;i++) fprintf(MTBfile,"%lf ",SC[0].MTB[i].M);
+               fprintf(MTBfile,"\n");
+            }
+            if (SC[0].Nacc > 0) {
+               for(i=0;i<SC[0].Nacc;i++) 
+                  fprintf(AccFile,"%le %le ",SC[0].Accel[i].TrueAcc,SC[0].Accel[i].MeasAcc);
+               fprintf(AccFile,"\n");
+            }
+            
+            //MagReport();
+            //GyroReport();
+
          }
 
       }
 
-      if (!strcmp(InOutPath,"./Potato/")) PotatoReport();
-      if (!strcmp(InOutPath,"./CMG/")) CmgReport();
+      /* An example how to call specialized reporting based on sim case */
+      /* if (!strcmp(InOutPath,"./Potato/")) PotatoReport(); */
+      
 
       if (CleanUpFlag) {
          fclose(timefile);
