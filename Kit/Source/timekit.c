@@ -293,7 +293,6 @@ void JDToGpsTime(double JD, long *GpsRollover, long *GpsWeek, double *GpsSecond)
       *GpsSecond = DaysSinceWeek*86400.0;
 }
 
-#if defined _USE_SYSTEM_TIME_
 /**********************************************************************/
 /* This function returns the number of microseconds since the Unix    */
 /* epoch, 00:00:00.0 Jan 1 1970.  Typically used as a tick/tock       */
@@ -309,8 +308,9 @@ double usec(void)
 #else
       return(0.0);
 #endif
-
 }
+
+#if defined _USE_SYSTEM_TIME_
 /**********************************************************************/
 /* Get time from operating system, and convert to compatible format.  */
 void RealSystemTime(long *Year, long *DOY, long *Month, long *Day,
