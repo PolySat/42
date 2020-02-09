@@ -24,6 +24,13 @@ Features:
   - Fast setup for concept studies
   - Rigorous and full-featured to support full spacecraft life cycle
 
+## Polysat Install
+Run `mkdir Object`
+
+Install glut with `sudo apt install freeglut3-dev`
+
+Make with `sudo make python`
+
 ## Installation
 
 If you're installing on Windows, see the file "Install-msys.txt" in the Docs
