@@ -63,13 +63,9 @@ EXTERN char CmdFileName[80];
 EXTERN double Pi, TwoPi, HalfPi, SqrtTwo, SqrtHalf, D2R, R2D;
 
 /* Simulation Control */
-EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH */
-EXTERN long IpcMode; /* IPC_OFF, IPC_TX, IPC_RX */
-EXTERN long SocketRole; /* IPC_SERVER or IPC_CLIENT */
+EXTERN long TimeMode; /* FAST_TIME, REAL_TIME, EXTERNAL_SYNCH, NOS3_TIME */
 EXTERN double SimTime,STOPTIME,DTSIM,DTOUT,DTOUTGL;
 EXTERN long OutFlag,GLOutFlag,GLEnable,CleanUpFlag;
-EXTERN double AbsTime; /* Absolute Time, sec since J2000 Epoch */
-EXTERN double AbsTimeOffset; /* Added to AbsTime to account for offsets between TAI, TDB, etc */
 
 /* Environment */
 EXTERN struct SphereHarmType MagModel;  /* -3,...,10 */
@@ -89,11 +85,17 @@ EXTERN long RwaImbalanceActive;
 EXTERN long ContactActive;
 EXTERN long SloshActive;
 EXTERN long ComputeEnvTrq;
+EXTERN long EphemOption; /* VSOP87 or DE430 */
 
-/* Calendar Time */
-EXTERN double AbsTime0; /* Time in sec since J2000 Epoch at Sim Start */
+/* Calendar Time is all based in Terrestrial Dynamical Time (TT or TDT) unless otherwise noted */
+EXTERN double AbsTime0; /* Time in sec since J2000 Epoch at Sim Start (TT) */
+EXTERN double AbsTime; /* Absolute Time (TT), sec since J2000 Epoch */
+EXTERN double AtomicTime; /* TAI = TT - 32.184 sec, sec since J2000 */
+EXTERN double LeapSec; /* Add to civil time (UTC) to synch with TAI */
+EXTERN double CivilTime; /* UTC = TAI - LeapSec */
+EXTERN double GpsTime; /* GPS Time = TAI - 19.0 sec */
 EXTERN double JulDay;
-EXTERN long doy,Year,Month,Day,Hour,Minute;
+EXTERN long doy,Year,Month,Day,Hour,Minute;  /* Based in TT */
 EXTERN double Second;
 EXTERN long GpsRollover,GpsWeek;
 EXTERN double GpsSecond;
@@ -145,8 +147,18 @@ EXTERN struct RegionType *Rgn;
 EXTERN long ExecuteCFDStep;
 EXTERN long EndCFD;
 
-EXTERN SOCKET TxSocket,RxSocket;
-EXTERN long EchoEnabled;
+/* Inter-Process Comm */
+EXTERN long Nipc;
+EXTERN struct IpcType *IPC;
+
+/* Master Random Process */
+EXTERN struct RandomProcessType *RNG;
+
+EXTERN double MapTime,JointTime,PathTime,PVelTime,FrcTrqTime;
+EXTERN double AssembleTime,LockTime,SolveTime;
+
+EXTERN struct ConstellationType Constell[89];
+
 
 long SimStep(const char *installedModelPath);
 void Ephemerides(void);
@@ -175,7 +187,6 @@ void FindPathVectors(struct SCType *S);
 void FindTotalAngMom(struct SCType *S);
 double FindTotalKineticEnergy(struct SCType *S);
 void UpdateScBoundingBox(struct SCType *S);
-void FindCmgAxisAndTrq(struct CMGType *C);
 void FindUnshadedAreas(struct SCType *S, double DirVecN[3]);
 void RadBelt(const char *installedModelPath, float RadiusKm, float MagLatDeg,
       int NumEnergies, float *ElectronEnergy,
@@ -191,8 +202,10 @@ void InitSim(int argc, char **argv);
 void InitOrbits(void);
 void InitSpacecraft(struct SCType *S, const char *installedModelDir);
 void LoadPlanets(void);
+long LoadDE430(char DE430Path[80],double JD);
 long DecodeString(char *s);
 void InitFSW(struct SCType *S);
+void InitAC(struct SCType *S);
 void InitLagrangePoints(void);
 
 long LoadTRVfromFile(const char *Path, const char *TrvFileName,
@@ -203,6 +216,11 @@ void CfdSlosh(struct SCType *S);
 void FakeCfdSlosh(struct SCType *S);
 void SendStatesToSpirent(void);
 
+void NOS3Time(long *year, long *day_of_year, long *month, long *day,
+              long *hour, long *minute, double *second);
+void NOS3SendMessageToFSW(void);
+void NOS3ReceiveMessageFromFSW(void);
+                   
 #ifdef _ENABLE_SOCKETS_
    void InterProcessComm(void);
    void InitInterProcessComm(void);

@@ -76,7 +76,10 @@ void ManageFlags(void)
 long AdvanceTime(void)
 {
       static long itime = 0;
+      static long PrevTick = 0;
+      static long CurrTick = 1;
       long Done;
+      static long First = 1;
 
       /* Advance time to next Timestep */
       #if defined _USE_SYSTEM_TIME_
@@ -88,6 +91,10 @@ long AdvanceTime(void)
                AbsTime = AbsTime0 + SimTime;
                break;
             case REAL_TIME :
+               //while(CurrTick == PrevTick) {
+               //   CurrTick = (long) (1.0E-6*usec()/DTSIM);
+               //}
+               //PrevTick = CurrTick;
                usleep(1.0E6*DTSIM);
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
@@ -95,19 +102,38 @@ long AdvanceTime(void)
                AbsTime = AbsTime0 + SimTime;
                break;
             case EXTERNAL_TIME :
-               usleep(1.0E6*DTSIM);
+               while(CurrTick == PrevTick) {
+                  CurrTick = (long) (1.0E-6*usec()/DTSIM);
+               }
+               PrevTick = CurrTick;
                SimTime += DTSIM;
                itime = (long) ((SimTime+0.5*DTSIM)/(DTSIM));
                SimTime = ((double) itime)*DTSIM;
                RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second,DTSIM);
-               AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+               AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+               AbsTime = AtomicTime + 32.184;
                JulDay = AbsTimeToJD(AbsTime);
                JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
                AbsTime0 = AbsTime - SimTime;
                break;
+            case NOS3_TIME :
+               if (First) {
+                  First = 0;
+                  double JD = YMDHMS2JD(Year, Month, Day, Hour, Minute, Second);
+                  AbsTime0 = JDToAbsTime(JD);
+               }
+               usleep(1.0E6*DTSIM);
+               NOS3Time(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
+               AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+               AbsTime = AtomicTime + 32.184;
+               JulDay = AbsTimeToJD(AbsTime);
+               JDToGpsTime(JulDay,&GpsRollover,&GpsWeek,&GpsSecond);
+               SimTime = AbsTime - AbsTime0;
+               break;
             /* case SSUP_TIME:
             **   RealSystemTime(&Year,&doy,&Month,&Day,&Hour,&Minute,&Second);
-            **   AbsTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+AbsTimeOffset);
+            **   AtomicTime = DateToAbsTime(Year,Month,Day,Hour,Minute,Second+LeapSec);
+            **   AbsTime = AtomicTime + 32.184;
             **   JulDay = AbsTimeToJD(AbsTime);
             **   SimTime = AbsTime - AbsTime0;
             **   break;
@@ -195,7 +221,10 @@ void ManageBoundingBoxes(void)
 void ZeroFrcTrq(void)
 {
       struct SCType *S;
-      long Isc,Ib;
+      struct BodyType *B;
+      struct JointType *G;
+      struct FlexNodeType *FN;
+      long Isc,Ib,Ig,In;
 
       for(Isc=0;Isc<Nsc;Isc++) {
          S = &SC[Isc];
@@ -203,12 +232,36 @@ void ZeroFrcTrq(void)
          S->Frc[1] = 0.0;
          S->Frc[2] = 0.0;
          for(Ib=0;Ib<S->Nb;Ib++) {
-            S->B[Ib].Frc[0] = 0.0;
-            S->B[Ib].Frc[1] = 0.0;
-            S->B[Ib].Frc[2] = 0.0;
-            S->B[Ib].Trq[0] = 0.0;
-            S->B[Ib].Trq[1] = 0.0;
-            S->B[Ib].Trq[2] = 0.0;
+            B = &S->B[Ib];
+            B->Frc[0] = 0.0;
+            B->Frc[1] = 0.0;
+            B->Frc[2] = 0.0;
+            B->Trq[0] = 0.0;
+            B->Trq[1] = 0.0;
+            B->Trq[2] = 0.0;
+         }
+         for(Ig=0;Ig<S->Ng;Ig++) {
+            G = &S->G[Ig];
+            G->Frc[0] = 0.0;
+            G->Frc[1] = 0.0;
+            G->Frc[2] = 0.0;
+            G->Trq[0] = 0.0;
+            G->Trq[1] = 0.0;
+            G->Trq[2] = 0.0;
+         }
+         if (S->FlexActive) {
+            for(Ib=0;Ib<S->Nb;Ib++) {
+               B = &S->B[Ib];
+               for(In=0;In<B->NumFlexNodes;In++) {
+                 FN = &B->FlexNode[In];
+                 FN->Frc[0] = 0.0;
+                 FN->Frc[1] = 0.0;
+                 FN->Frc[2] = 0.0;
+                 FN->Trq[0] = 0.0;
+                 FN->Trq[1] = 0.0;
+                 FN->Trq[2] = 0.0;
+               }
+            }
          }
       }
 }
@@ -307,14 +360,22 @@ int exec(int argc,char **argv)
 
       if (argc > 3) installedModelPath = argv[3];
 
+      MapTime = 0.0;
+      JointTime = 0.0;
+      PathTime = 0.0;
+      PVelTime = 0.0;
+      FrcTrqTime = 0.0;
+      AssembleTime = 0.0;
+      LockTime = 0.0;
+      SolveTime = 0.0;
+
       InitSim(argc,argv);
       for (Isc=0;Isc<Nsc;Isc++) {
          if (SC[Isc].Exists) {
             InitSpacecraft(&SC[Isc], installedModelPath);
-            InitFSW(&SC[Isc]);
          }
       }
-      
+
       // Consume args used by InitSim
       if (argc == 2)
          consumedArgs = 2;
@@ -339,6 +400,14 @@ int exec(int argc,char **argv)
          }
       #endif
 
+      //printf("\n\nMap Time = %lf sec\n",MapTime);
+      //printf("Joint Partial Time = %lf sec\n",JointTime);
+      //printf("Path Time = %lf sec\n",PathTime);
+      //printf("PVel Time = %lf sec\n",PVelTime);
+      //printf("FrcTrq Time = %lf sec\n",FrcTrqTime);
+      //printf("Assemble Time = %lf sec\n",AssembleTime);
+      //printf("Lock Time = %lf sec\n",LockTime);
+      //printf("Solve Time = %lf sec\n",SolveTime);
       return(0);
 }
 

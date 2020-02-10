@@ -16,16 +16,14 @@
 #define __TIMEKIT_H__
 
 #include <math.h>
-#if defined _USE_SYSTEM_TIME_
-   #if defined(_WIN32)
-      #include <Windows.h>
-   #elif defined(__APPLE__)
+#if defined(_WIN32)
+   #include <Windows.h>
+#elif defined(__APPLE__)
 /*      #include <CoreServices/Timer.h> */ /* For Microseconds high-precision timer */
-   #endif
-   #include <time.h>
-   #ifndef _WIN32
-      #include <sys/time.h>
-   #endif
+#endif
+#include <time.h>
+#ifndef _WIN32
+   #include <sys/time.h>
 #endif
 
 /* #ifdef __cplusplus

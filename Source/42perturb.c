@@ -395,6 +395,16 @@ void ThirdBodyGravForce(double p[3],double s[3],double mu, double mass,
       for(j=0;j<3;j++) Frc[j] = mu*mass*(s[j]/s3-p[j]/p3);
 }
 /**********************************************************************/
+void J2Force(struct SCType *S, struct OrbitType *O, double FrcN[3])
+{
+      double Fh;
+      long i;
+      
+      Fh = S->mass*O->J2Fh1*sin(O->ArgP+O->anom);
+      
+      for(i=0;i<3;i++) FrcN[i] = -Fh*S->CLN[1][i];
+}
+/**********************************************************************/
 void GravPertForce(struct SCType *S)
 {
       struct OrbitType *O;
@@ -459,6 +469,10 @@ void GravPertForce(struct SCType *S)
          EGM96(ModelPath,EarthGravModel.N,EarthGravModel.M,S->mass,S->PosN,
                World[EARTH].PriMerAng,FgeoN);
          for(j=0;j<3;j++) S->Frc[j] += FgeoN[j];
+         if (O->J2DriftEnabled) {
+            J2Force(S,O,Frc);
+            for(j=0;j<3;j++) S->Frc[j] -= Frc[j];
+         }
       }
       else if (OrbCenter == MARS) {
          GMM2B(ModelPath,MarsGravModel.N,MarsGravModel.M,S->mass,S->PosN,
@@ -964,11 +978,11 @@ void ContactFrcTrq(struct SCType *S)
       }
 
 /* .. Contact with other S/C */
-      for(Isc=S->Tag+1;Isc<Nsc;Isc++) {
+      for(Isc=S->ID+1;Isc<Nsc;Isc++) {
          Sc = &SC[Isc];
          /* Cheap S/Sc proximity checks */
          if (!Sc->Exists) continue;
-         if (Sc->Tag == S->Tag) continue;
+         if (Sc->ID == S->ID) continue;
          if (Orb[Sc->RefOrb].World != O->World) continue;
          for(i=0;i<3;i++) dx[i] = S->PosN[i] - Sc->PosN[i];
          if (MAGV(dx) > 1.2*(S->BBox.radius + Sc->BBox.radius)) continue;
@@ -1012,7 +1026,7 @@ void EnvTrq(struct SCType *S)
 
       if (E->First) {
          E->First = 0;
-         sprintf(envfilename,"EnvTrq%02li.42",S->Tag);
+         sprintf(envfilename,"EnvTrq%02li.42",S->ID);
          E->envfile = FileOpen(InOutPath,envfilename,"w");
       }
 
