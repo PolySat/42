@@ -221,6 +221,7 @@ struct ThrType {
 
 struct GyroType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    double Axis[3];

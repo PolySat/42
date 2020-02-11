@@ -343,22 +343,70 @@ nasa42_Spacecraft_dcm_lvlh_inertial(PyObject *self, void *arg)
    return pymatrix_from_dblmatrix(3, 3, sc->sc->CLN);
 }
 
+/**
+ * Returns a Python dictionay of readings from all gyros on the spacecraft.
+ * Each entry in the dictionary is formatted as follows:
+ *    "Name" : [ x, y, z, Rate ]
+ * Where  x, y, z Represent a unit vector in the direction of the gyro
+ * and Rate is the reading from the gyro.
+ */
+static PyObject *
+nasa42_Spacecraft_gyros(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   PyObject *gyroDict = PyDict_New();
+   if (!gyroDict)
+      return NULL;
+
+   for (size_t i = 0; i < sc->sc->AC.Ngyro; i++)
+   {
+      struct AcGyroType gyro = sc->sc->AC.Gyro[i];
+      double gyroData[] = {gyro.Axis[0], gyro.Axis[1], gyro.Axis[2], gyro.Rate};
+      PyDict_SetItemString(gyroDict, sc->sc->Gyro[i].name, pyarray_from_dblarray(4, gyroData));
+   }
+   return gyroDict;
+}
+
+/**
+ * Returns a Python dictionay of all speeds of all wheels on the spacecraft.
+ * Each entry in the dictionary is formatted as follows:
+ *    "Name" : W
+ * Where W is a float representing the speed of the wheel.
+ */
+static PyObject *
+nasa42_Spacecraft_wheels(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   PyObject *wheelDict = PyDict_New();
+   if (!wheelDict)
+      return NULL;
+
+   for (size_t i = 0; i < sc->sc->AC.Nwhl; i++)
+      PyDict_SetItemString(wheelDict, sc->sc->Whl[i].name, PyFloat_FromDouble(sc->sc->AC.Whl[i].w));
+
+   return wheelDict;
+}
+
 static PyMethodDef nasa42_Spacecraft_methods[] = {
-   {"set_mtb", (PyCFunction)nasa42_Spacecraft_set_mtb, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_set_mtb__doc__},
-   {"set_wheel",(PyCFunction)nasa42_Spacecraft_set_wheel, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_set_wheel__doc__},
-   {"position", (PyCFunction)nasa42_Spacecraft_position, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_position__doc__},
-   {"velocity", (PyCFunction)nasa42_Spacecraft_velocity, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_velocity__doc__},
-   {"mag_field", (PyCFunction)nasa42_Spacecraft_mag_field, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_mag_field__doc__},
-   {"sun_vec", (PyCFunction)nasa42_Spacecraft_sun_vec, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_sun_vec__doc__},
-   {NULL, NULL, 0, NULL}
-};
+    {"set_mtb", (PyCFunction)nasa42_Spacecraft_set_mtb, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_set_mtb__doc__},
+    {"set_wheel",(PyCFunction)nasa42_Spacecraft_set_wheel, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_set_wheel__doc__},
+    {"position", (PyCFunction)nasa42_Spacecraft_position, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_position__doc__},
+    {"velocity", (PyCFunction)nasa42_Spacecraft_velocity, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_velocity__doc__},
+    {"mag_field", (PyCFunction)nasa42_Spacecraft_mag_field, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_mag_field__doc__},
+    {"sun_vec", (PyCFunction)nasa42_Spacecraft_sun_vec, METH_VARARGS | METH_KEYWORDS, nasa42_Spacecraft_sun_vec__doc__},
+    {NULL, NULL, 0, NULL}
+    };
 
 static PyGetSetDef nasa42_Spacecraft_getset[] = {
-   {"quaternion", nasa42_Spacecraft_quaternion, NULL, "Satellite quaternion from ECI to Body.", NULL},
-   {"ang_vel", nasa42_Spacecraft_ang_vel, NULL, "Angular velocity of Body in Inertial Frame (rads/s).", NULL},
-   {"dcm_lvlh_inertial", nasa42_Spacecraft_dcm_lvlh_inertial, NULL, "Rotation matrix from inertial to lvlh frame.", NULL},
-   {NULL, NULL, NULL, NULL, NULL}
-};
+    {"quaternion", nasa42_Spacecraft_quaternion, NULL, "Satellite quaternion from ECI to Body.", NULL},
+    {"ang_vel", nasa42_Spacecraft_ang_vel, NULL, "Angular velocity of Body in Inertial Frame (rads/s).", NULL},
+    {"dcm_lvlh_inertial", nasa42_Spacecraft_dcm_lvlh_inertial, NULL, "Rotation matrix from inertial to lvlh frame.", NULL},
+
+    {"gyros", nasa42_Spacecraft_gyros, NULL, "Dictonary of all gyros.", NULL},
+    {"wheels", nasa42_Spacecraft_wheels, NULL, "Dictonary of all wheels.", NULL},
+
+    {NULL, NULL, NULL, NULL, NULL}
+    };
 
 PyTypeObject nasa42_SpacecraftType = {
     PyVarObject_HEAD_INIT(NULL, 0)
