@@ -138,8 +138,8 @@ struct AcFssType {
    /*~ Internal Variables ~*/
    long Valid;       /* [~>~] */
    double SunAng[2]; /* [[rad]] [~>~] */
-   double SunVecS[3];
-   double SunVecB[3];
+   double SunVecS[3]; /* SunVectorSensor
+   double SunVecB[3]; /* SunVectorBodyFrame */
 };
 
 struct AcStarTrackerType {
