@@ -1828,6 +1828,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       }
       else {
          for(It=0;It<S->Nthr;It++) {
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Thr[It].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Thr[It].Fmax,
                    junk,&newline);
@@ -1855,6 +1859,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ig=0;Ig<S->Ngyro;Ig++) {
             Gyro = &S->Gyro[Ig];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Gyro[Ig].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SampleTime,junk,&newline);
             Gyro->MaxCounter = (long) (Gyro->SampleTime/DTSIM+0.5);
@@ -1902,6 +1910,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Im=0;Im<S->Nmag;Im++) {
             MAG = &S->MAG[Im];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->MAG[Im].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->SampleTime,junk,&newline);
             MAG->MaxCounter = (long) (MAG->SampleTime/DTSIM+0.5);
@@ -1933,6 +1945,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ic=0;Ic<S->Ncss;Ic++) {
             CSS = &S->CSS[Ic];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->CSS[Ic].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->SampleTime,junk,&newline);
             CSS->MaxCounter = (long) (CSS->SampleTime/DTSIM+0.5);
@@ -1964,6 +1980,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ifss=0;Ifss<S->Nfss;Ifss++) {
             FSS = &S->FSS[Ifss];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->FSS[Ifss].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->SampleTime,junk,&newline);
             FSS->MaxCounter = (long) (FSS->SampleTime/DTSIM+0.5);
@@ -2000,6 +2020,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ist=0;Ist<S->Nst;Ist++) {
             ST = &S->ST[Ist];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->ST[Ist].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&ST->SampleTime,junk,&newline);
             ST->MaxCounter = (long) (ST->SampleTime/DTSIM+0.5);
@@ -2045,6 +2069,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ig=0;Ig<S->Ngps;Ig++) {
             GPS = &S->GPS[Ig];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->GPS[Ig].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->SampleTime,junk,&newline);
             GPS->MaxCounter = (long) (GPS->SampleTime/DTSIM+0.5);
@@ -2071,6 +2099,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ia=0;Ia<S->Nacc;Ia++) {
             Accel = &S->Accel[Ia];
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Accel[Ia].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%[^\n] %[\n]",junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SampleTime,junk,&newline);
             Accel->MaxCounter = (long) (Accel->SampleTime/DTSIM+0.5);
