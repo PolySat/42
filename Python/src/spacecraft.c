@@ -367,6 +367,63 @@ nasa42_Spacecraft_gyros(PyObject *self, void *arg)
    return gyroDict;
 }
 
+static PyObject *
+nasa42_Spacecraft_magnetometer(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   PyObject *magDict = PyDict_New();
+   if(!magDict)
+      return NULL;
+   for (size_t i =0; i<sc->sc->AC.Nmag;i++) {
+      struct AcMagnetometerType MAG = sc->sc->AC.MAG[i];
+      double magData[] = {MAG.Axis[0], MAG.Axis[1], MAG.Axis[2], MAG.Field};
+      PyDict_SetItemString(magDict,sc->sc->MAG[i].name,pyarray_from_dblarray(4,magData));
+   }
+   return magDict;
+}
+
+static PyObject *
+nasa42_Spacecraft_FSS(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   PyObject *fssDict = PyDict_New();
+   if(!fssDict)
+      return NULL;
+   for (size_t i =0; i<sc->sc->AC.Nfss;i++)
+      PyDict_SetItemString(fssDict,sc->sc->FSS[i].name,pyarray_from_dblarray(3, sc->sc->AC.FSS[i].SunVecB));
+   
+   return fssDict;
+}
+
+static PyObject *
+nasa42_Spacecraft_ST(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   PyObject *stDict = PyDict_New();
+   if(!stDict)
+      return NULL;
+   for (size_t i =0; i<sc->sc->AC.Nst;i++)
+      PyDict_SetItemString(stDict,sc->sc->ST[i].name,pyarray_from_dblarray(4, sc->sc->AC.ST[i].qbn));
+   
+   return stDict;
+}
+
+static PyObject *
+nasa42_Spacecraft_GPS(PyObject *self, void *arg)
+{
+   nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
+   PyObject *gpsDict = PyDict_New();
+   if(!gpsDict)
+      return NULL;
+   for (size_t i =0; i<sc->sc->AC.Ngps;i++) {
+      struct AcGpsType gps = sc->sc->AC.GPS[i];
+      double gpsData[] = {gps.PosN[0], gps.PosN[1], gps.PosN[2], gps.VelN[0], gps.VelN[1], gps.VelN[2], gps.PosW[0],
+       gps.PosW[1], gps.PosW[2], gps.VelW[0], gps.VelW[1], gps.VelW[2]};
+      PyDict_SetItemString(gpsDict,sc->sc->GPS[i].name,pyarray_from_dblarray(12, gpsData));
+   }
+   return gpsDict;
+}
+
 /**
  * Returns a Python dictionay of all speeds of all wheels on the spacecraft.
  * Each entry in the dictionary is formatted as follows:
@@ -404,6 +461,10 @@ static PyGetSetDef nasa42_Spacecraft_getset[] = {
 
     {"gyros", nasa42_Spacecraft_gyros, NULL, "Dictonary of all gyros.", NULL},
     {"wheels", nasa42_Spacecraft_wheels, NULL, "Dictonary of all wheels.", NULL},
+    {"magnetometer", nasa42_Spacecraft_magnetometer,NULL, "Dictionary of all magnetometer", NULL},
+    {"fss", nasa42_Spacecraft_FSS,NULL, "Dictionary of all the FSSs", NULL},
+    {"star_tracker", nasa42_Spacecraft_ST,NULL,"Dictionary of all the Star Tracker", NULL},
+    {"gps", nasa42_Spacecraft_GPS,NULL, "Dictionary of all the GPSs", NULL},
 
     {NULL, NULL, NULL, NULL, NULL}
     };
