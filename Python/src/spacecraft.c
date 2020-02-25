@@ -367,68 +367,107 @@ nasa42_Spacecraft_gyros(PyObject *self, void *arg)
    return gyroDict;
 }
 
+/**
+ * Returns a Python dictionay of readings from all magnetometers on the spacecraft.
+ * Each entry in the dictionary is formatted as follows:
+ *    "Name" : [ x, y, z, Field ]
+ * Where  x, y, z Represent a unit vector in the direction of the magnetometer axis
+ * and Field is the reading from the magnetometer in Tesla.
+ */
 static PyObject *
 nasa42_Spacecraft_magnetometer(PyObject *self, void *arg)
 {
    nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
    PyObject *magDict = PyDict_New();
+
    if(!magDict)
       return NULL;
-   for (size_t i =0; i<sc->sc->AC.Nmag;i++) {
-      struct AcMagnetometerType MAG = sc->sc->AC.MAG[i];
-      double magData[] = {MAG.Axis[0], MAG.Axis[1], MAG.Axis[2], MAG.Field};
-      PyDict_SetItemString(magDict,sc->sc->MAG[i].name,pyarray_from_dblarray(4,magData));
+
+   for (size_t i = 0; i < sc->sc->AC.Nmag; i++) {
+      struct AcMagnetometerType mag = sc->sc->AC.MAG[i];
+      double magData[] = {mag.Axis[0], mag.Axis[1], mag.Axis[2], mag.Field};
+      PyDict_SetItemString(magDict, sc->sc->MAG[i].name, pyarray_from_dblarray(4, magData));
    }
+
    return magDict;
 }
 
+/**
+ * Returns a Python dictionay of readings from all fine sun sensors on the spacecraft.
+ * Each entry in the dictionary is formatted as follows:
+ *    "Name" : SunVecS
+ * Where  SunVecS Represent a unit vector toward the sun expressed in the sensor frame
+ * SunVecS is all zeros if the sun is not in the sensor FOV
+ */
 static PyObject *
 nasa42_Spacecraft_FSS(PyObject *self, void *arg)
 {
    nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
    PyObject *fssDict = PyDict_New();
+
    if(!fssDict)
       return NULL;
-   for (size_t i =0; i<sc->sc->AC.Nfss;i++)
-      PyDict_SetItemString(fssDict,sc->sc->FSS[i].name,pyarray_from_dblarray(3, sc->sc->AC.FSS[i].SunVecB));
-   
+
+   for (size_t i = 0; i < sc->sc->AC.Nfss; i++)
+      PyDict_SetItemString(fssDict, sc->sc->FSS[i].name, pyarray_from_dblarray(3, sc->sc->AC.FSS[i].SunVecS));
+
    return fssDict;
 }
 
+/**
+ * Returns a Python dictionay of readings from all star trackers on the spacecraft.
+ * Each entry in the dictionary is formatted as follows:
+ *    "Name" : qbn
+ * Where  qbn represents the frame rotation from ECI to the spacecraft body frame
+ * qbn[0] is the real component of the quaternion
+ * TODO: populate custom star tracker parameters from yaml files
+ */
 static PyObject *
 nasa42_Spacecraft_ST(PyObject *self, void *arg)
 {
    nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
    PyObject *stDict = PyDict_New();
+
    if(!stDict)
       return NULL;
-   for (size_t i =0; i<sc->sc->AC.Nst;i++)
-      PyDict_SetItemString(stDict,sc->sc->ST[i].name,pyarray_from_dblarray(4, sc->sc->AC.ST[i].qbn));
-   
+
+   for (size_t i = 0; i < sc->sc->AC.Nst; i++)
+      PyDict_SetItemString(stDict, sc->sc->ST[i].name, pyarray_from_dblarray(4, sc->sc->AC.ST[i].qbn));
+
    return stDict;
 }
 
+/**
+ * Returns a Python dictionay of readings from all GPS receivers on the spacecraft.
+ * Each entry in the dictionary is formatted as follows:
+ *    "Name" : [PosN, VelN]
+ * Where  PosN represents the measured position vector of the spacecraft in ECI
+ * and VelN represents the measured velocity vector of the spacecraft in ECI
+ * TODO: populate custom GPS parameters from yaml files
+ */
 static PyObject *
 nasa42_Spacecraft_GPS(PyObject *self, void *arg)
 {
    nasa42_Spacecraft *sc = (nasa42_Spacecraft *)self;
    PyObject *gpsDict = PyDict_New();
+
    if(!gpsDict)
       return NULL;
-   for (size_t i =0; i<sc->sc->AC.Ngps;i++) {
+
+   for (size_t i = 0; i < sc->sc->AC.Ngps; i++) {
       struct AcGpsType gps = sc->sc->AC.GPS[i];
-      double gpsData[] = {gps.PosN[0], gps.PosN[1], gps.PosN[2], gps.VelN[0], gps.VelN[1], gps.VelN[2], gps.PosW[0],
-       gps.PosW[1], gps.PosW[2], gps.VelW[0], gps.VelW[1], gps.VelW[2]};
-      PyDict_SetItemString(gpsDict,sc->sc->GPS[i].name,pyarray_from_dblarray(12, gpsData));
+      double gpsData[] = {gps.PosN[0], gps.PosN[1], gps.PosN[2], gps.VelN[0], gps.VelN[1], gps.VelN[2]};
+      PyDict_SetItemString(gpsDict, sc->sc->GPS[i].name, pyarray_from_dblarray(6, gpsData));
    }
+
    return gpsDict;
 }
 
 /**
- * Returns a Python dictionay of all speeds of all wheels on the spacecraft.
+ * Returns a Python dictionay of all speeds and axis of all wheels on the spacecraft.
  * Each entry in the dictionary is formatted as follows:
- *    "Name" : W
- * Where W is a float representing the speed of the wheel.
+ *    "Name" : [axis_x, axis_y, axis_z, w]
+ * Where w is a float representing the speed of the wheel.
  */
 static PyObject *
 nasa42_Spacecraft_wheels(PyObject *self, void *arg)
@@ -438,8 +477,11 @@ nasa42_Spacecraft_wheels(PyObject *self, void *arg)
    if (!wheelDict)
       return NULL;
 
-   for (size_t i = 0; i < sc->sc->AC.Nwhl; i++)
-      PyDict_SetItemString(wheelDict, sc->sc->Whl[i].name, PyFloat_FromDouble(sc->sc->AC.Whl[i].w));
+   for (size_t i = 0; i < sc->sc->AC.Nwhl; i++) {
+      struct AcWhlType wheel = sc->sc->AC.Whl[i];
+      double wheelData[] = {wheel.Axis[0], wheel.Axis[1], wheel.Axis[2], wheel.w};
+      PyDict_SetItemString(wheelDict, sc->sc->Whl[i].name, pyarray_from_dblarray(4, wheelData));
+   }
 
    return wheelDict;
 }
