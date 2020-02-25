@@ -3824,7 +3824,6 @@ void LoadConstellations(void) {
 /**********************************************************************/
 void InitSim(int argc, char **argv)
 {
-      printf("Starting sim initialization...");
       FILE *infile;
       struct OrbitType *Eph;
       char junk[120],newline;
@@ -3858,7 +3857,6 @@ void InitSim(int argc, char **argv)
 
 /* .. Read from file Inp_Sim.txt */
       infile=FileOpen(InOutPath,"Inp_Sim.txt","r");
-      printf("Reading Inp_Sim.txt...");
 
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -3895,7 +3893,6 @@ void InitSim(int argc, char **argv)
          Orb[Iorb].Tag = Iorb;
       }
 
-      printf("Reading SC.txt...");
 /* .. Spacecraft */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&Nsc,junk,&newline);
