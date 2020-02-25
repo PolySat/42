@@ -437,7 +437,7 @@ long FswCmdInterpreter(char CmdLine[512],double *CmdTime)
          CmdTime,&Isc,&wc) == 3) {
          NewCmdProcessed = TRUE;
          Cmd = &SC[Isc].AC.Cmd;
-         
+
          Cmd->Parm = PARM_AXIS_SPIN;
          Cmd->SpinRate = wc*D2R;
       }
@@ -716,15 +716,15 @@ void SpinnerCommand(struct SCType *S)
       struct CmdVecType *PV;
       double MagH;
       long i;
-      
+
       Cmd = &S->AC.Cmd;
       PV = &Cmd->PriVec;
-      
+
       if (PV->Frame != FRAME_N) {
          printf("SpinnerCommand requires that Primary Vector be fixed in N\n");
          exit(1);
       }
-      
+
       FindCmdVecN(S,PV);
       for(i=0;i<3;i++) {
          Cmd->wrn[i] = PV->R[i]*Cmd->SpinRate;
@@ -734,7 +734,7 @@ void SpinnerCommand(struct SCType *S)
       for(i=0;i<3;i++) {
          Cmd->Hvn[i] = PV->N[i]*MagH;
       }
-      
+
 }
 /**********************************************************************/
 /* This function copies needed parameters from the SC structure to    */
@@ -749,9 +749,9 @@ void InitAC(struct SCType *S)
       AC = &S->AC;
 
       AC->Init = 1;
-      
+
       AC->ID = S->ID;
-      
+
       /* Time, Mass */
       AC->DT = S->FswSampleTime;
       AC->mass = S->mass;
@@ -761,7 +761,7 @@ void InitAC(struct SCType *S)
             AC->MOI[i][j] = S->I[i][j];
          }
       }
-      
+
       /* Bodies */
       AC->Nb = S->Nb;
       if (AC->Nb > 0) {
@@ -776,7 +776,7 @@ void InitAC(struct SCType *S)
             }
          }
       }
-      
+
       /* Joints */
       AC->Ng = S->Ng;
       if (AC->Ng > 0) {
@@ -796,7 +796,7 @@ void InitAC(struct SCType *S)
             AC->G[Ig].TrnSeq = S->G[Ig].TrnSeq;
          }
       }
-      
+
       /* Gyro Axes */
       AC->Ngyro = S->Ngyro;
       if (AC->Ngyro > 0) {
@@ -829,7 +829,7 @@ void InitAC(struct SCType *S)
             AC->CSS[i].Scale = S->CSS[i].Scale;
          }
       }
-      
+
       /* Fine Sun Sensors */
       AC->Nfss = S->Nfss;
       if (AC->Nfss > 0) {
@@ -857,9 +857,9 @@ void InitAC(struct SCType *S)
       /* GPS */
       AC->Ngps = S->Ngps;
       if (AC->Ngps > 0) {
-         AC->GPS = (struct AcGpsType *) calloc(AC->Ngps,sizeof(struct AcGpsType)); 
-      }     
-      
+         AC->GPS = (struct AcGpsType *) calloc(AC->Ngps,sizeof(struct AcGpsType));
+      }
+
       /* Accelerometer Axes */
       AC->Nacc = S->Nacc;
       if (AC->Nacc > 0) {
@@ -884,7 +884,7 @@ void InitAC(struct SCType *S)
             }
          }
          if (S->Nw == 1) {
-            for(i=0;i<3;i++) AC->Whl[0].DistVec[i] = AC->Whl[0].Axis[i]; 
+            for(i=0;i<3;i++) AC->Whl[0].DistVec[i] = AC->Whl[0].Axis[i];
          }
          else if (S->Nw >= 2) {
             PINVG(A,Aplus,3,S->Nw);
@@ -916,7 +916,7 @@ void InitAC(struct SCType *S)
             }
          }
          if (S->Nmtb == 1) {
-            for(i=0;i<3;i++) AC->MTB[0].DistVec[i] = AC->MTB[0].Axis[i]; 
+            for(i=0;i<3;i++) AC->MTB[0].DistVec[i] = AC->MTB[0].Axis[i];
          }
          else if (S->Nmtb >= 2) {
             PINVG(A,Aplus,3,S->Nmtb);
@@ -947,7 +947,7 @@ void InitAC(struct SCType *S)
             VxV(r,AC->Thr[i].Axis,AC->Thr[i].rxA);
          }
       }
-      
+
       /* Controllers */
       AC->PrototypeCtrl.Init = 1;
       AC->AdHocCtrl.Init = 1;
@@ -959,11 +959,11 @@ void InitAC(struct SCType *S)
       AC->ThrCtrl.Init = 1;
       AC->CfsCtrl.Init = 1;
       AC->ThrSteerCtrl.Init = 1;
-      
+
       AC->PrototypeCtrl.wc = 0.05*TwoPi;
       AC->PrototypeCtrl.amax = 0.01;
       AC->PrototypeCtrl.vmax = 0.5*D2R;
-      
+
       /* Initialize variables to avoid divide-by-zero before first sensor measurements */
       AC->qbn[3] = 1.0;
       AC->svb[0] = 1.0;
@@ -1033,20 +1033,20 @@ void PrototypeFSW(struct SCType *S)
       AC = &S->AC;
       C = &AC->PrototypeCtrl;
       Cmd = &AC->Cmd;
-            
+
       if (Cmd->Parm == PARM_AXIS_SPIN) {
          if (C->Init) {
             C->Init = 0;
             C->Kprec = 3.0E-2;
             C->Knute = 1.0;
          }
-         
+
          SpinnerCommand(S);
-         
+
          B = &S->B[0];
-         
+
          MxV(B->CN,Cmd->Hvn,Hvnb);
-         
+
          for(i=0;i<3;i++) {
             Herr[i] = S->Hvb[i] - Hvnb[i];
             werr[i] = AC->wbn[i] - Cmd->wrn[i];
@@ -1054,14 +1054,14 @@ void PrototypeFSW(struct SCType *S)
             if (MAGV(Herr) < 0.5*MAGV(Cmd->Hvn)) {
                C->Tcmd[i] -= C->Kprec*Herr[i];
             }
-            AC->IdealTrq[i] = Limit(C->Tcmd[i],-0.1,0.1); 
+            AC->IdealTrq[i] = Limit(C->Tcmd[i],-0.1,0.1);
          }
-         
+
       }
       else {
          if (C->Init) {
             C->Init = 0;
-            
+
             for(Ig=0;Ig<AC->Ng;Ig++) {
                FindAppendageInertia(Ig,S,Iapp);
                for(j=0;j<3;j++) {
@@ -1166,7 +1166,7 @@ void SpinnerFSW(struct SCType *S)
       VxV(AC->bvb,C->Tcmd,C->Mcmd);
       magb2 = VoV(AC->bvb,AC->bvb);
       for (i=0;i<3;i++) C->Mcmd[i] /= magb2;
-      
+
       for(Imtb=0;Imtb<AC->Nmtb;Imtb++) {
          M = &AC->MTB[Imtb];
          M->Mcmd = VoV(M->DistVec,C->Mcmd);
@@ -1202,7 +1202,7 @@ void MomBiasFSW(struct SCType *S)
 
       AC = &S->AC;
       C = &AC->MomBiasCtrl;
-      
+
       if (C->Init) {
          C->Init = 0;
       }
@@ -1268,7 +1268,7 @@ void ThreeAxisFSW(struct SCType *S)
       long i,j;
       struct AcType *AC;
       struct AcThreeAxisCtrlType *C;
-      
+
       AC = &S->AC;
       C = &AC->ThreeAxisCtrl;
 
@@ -1475,13 +1475,13 @@ void CmgFSW(struct SCType *S)
       for(i=0;i<3;i++) {
          C->therr[i] = 2.0*qbr[i];
          C->werr[i] = S->B[0].wn[i];
-         C->Tcmd[i] = -C->Kr[i]*C->werr[i] - C->Kp[i]*C->therr[i]; 
+         C->Tcmd[i] = -C->Kr[i]*C->werr[i] - C->Kp[i]*C->therr[i];
       }
 
       for(i=0;i<4;i++) {
          for(j=0;j<3;j++) {
             Axis[i][j] = AC->G[i].COI[2][j];
-            Gim[i][j] = AC->G[i].COI[0][j];  
+            Gim[i][j] = AC->G[i].COI[0][j];
          }
          H[i] = 75.0;
       }
@@ -1511,16 +1511,16 @@ void ThrFSW(struct SCType *S)
       double FoA,TorxA;
       static long Idx = 0;
       long i;
-      
+
       AC = &S->AC;
       C = &AC->ThrCtrl;
-      
+
       if (C->Init) {
          C->Init = 0;
          for(i=0;i<3;i++) FindPDGains(AC->MOI[i][i],0.1,0.7,&C->Kw[i],&C->Kth[i]);
          FindPDGains(AC->mass,0.05,1.0,&C->Kv,&C->Kp);
       }
-      
+
 /* .. Commanded Attitude and Position */
       MoveTime -= AC->DT;
       if (MoveTime < 0.0) {
@@ -1536,7 +1536,7 @@ void ThrFSW(struct SCType *S)
       QxQT(AC->qbn,qrn,AC->qbr);
       RECTIFYQ(AC->qbr);
       MTxV(S->CLN,PosRL,PosRN);
-      
+
 /* .. Force and Torque Commands */
       for(i=0;i<3;i++) {
          AC->Tcmd[i] = -C->Kw[i]*S->B[0].wn[i] - C->Kth[i]*2.0*AC->qbr[i];
@@ -1546,7 +1546,7 @@ void ThrFSW(struct SCType *S)
       MxV(S->B[0].CN,AC->Fcmd,FcmdB);
       for(i=0;i<3;i++)  FcmdB[i] = Limit(FcmdB[i],-2.0,2.0);
       MTxV(S->B[0].CN,FcmdB,AC->Fcmd);
-      
+
 #if 0
 /* .. Ideal Actuators to check out controller before tackling thruster logic */
       for(i=0;i<3;i++) {
@@ -1558,16 +1558,16 @@ void ThrFSW(struct SCType *S)
       for(i=0;i<AC->Nthr;i++) {
          T = &AC->Thr[i];
          T->PulseWidthCmd = 0.0;
-         
+
          FoA = VoV(FcmdB,T->Axis);
          TorxA = VoV(AC->Tcmd,T->rxA);
          if ( FoA > 0.0 && TorxA > 0.0) {
             T->PulseWidthCmd = (0.25*FoA + TorxA)/T->Fmax*AC->DT;
          }
-         
+
          T->PulseWidthCmd = Limit(T->PulseWidthCmd,0.0,AC->DT);
       }
-         
+
 #endif
 }
 #if 0
@@ -1581,7 +1581,7 @@ void CfsFSW(struct AcType *AC)
       double L1[3],L2[3],L3[3];
       double Hb[3],HxB[3];
       long i;
-      
+
       C = &AC->CfsCtrl;
       G = &AC->G[0];
 
@@ -1601,7 +1601,7 @@ void CfsFSW(struct AcType *AC)
       FssProcessing(AC);
       StarTrackerProcessing(AC);
       GpsProcessing(AC);
-      
+
 /* .. Commanded Attitude */
       CopyUnitV(AC->PosN,L3);
       VxV(AC->PosN,AC->VelN,L2);
@@ -1620,7 +1620,7 @@ void CfsFSW(struct AcType *AC)
       }
       C2Q(AC->CLN,AC->qln);
       AC->wln[1] = -MAGV(AC->VelN)/MAGV(AC->PosN);
-            
+
 /* .. Attitude Control */
       QxQT(AC->qbn,AC->qln,AC->qbr);
       RECTIFYQ(AC->qbr);
@@ -1633,10 +1633,10 @@ void CfsFSW(struct AcType *AC)
       for(i=0;i<3;i++) Hb[i] = AC->MOI[i][i]*AC->wbn[i] + AC->Whl[i].H;
       VxV(Hb,AC->bvb,HxB);
       for(i=0;i<3;i++) AC->Mcmd[i] = C->Kunl*HxB[i];
-      
+
 /* .. Solar Array Steering */
       G->Cmd.Ang[0] = atan2(AC->svb[0],AC->svb[2]);
-      
+
 /* .. Actuator Processing */
       WheelProcessing(AC);
       MtbProcessing(AC);
@@ -1687,16 +1687,16 @@ void FlightSoftWare(struct SCType *S)
       struct IpcType *I;
       long Iipc;
       #endif
-      
+
       if (S->InitAC) {
          S->InitAC = 0;
          InitAC(S);
       }
-      
+
       S->FswSampleCounter++;
       if (S->FswSampleCounter >= S->FswMaxCounter) {
          S->FswSampleCounter = 0;
-         
+
          switch(S->FswTag){
             case PASSIVE_FSW:
                break;

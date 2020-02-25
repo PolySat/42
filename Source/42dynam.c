@@ -30,7 +30,7 @@ void FindCmgTrq(struct CMGType *C, double wb0n[3])
       double ZeroMatrix[3][3] = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
       double JunkVec1[3],JunkVec2[3];
       long i,j;
-      
+
       for(i=0;i<C->DOF;i++) {
          Ang[i] = C->ang[i];
          AngRate[i] = C->angrate[i];
@@ -40,7 +40,7 @@ void FindCmgTrq(struct CMGType *C, double wb0n[3])
       JointPartials(C->Init,FALSE,C->Seq,123,Ang,AngRate,C->Gamma,Gs,
          Gds,ZeroVec,ZeroMatrix,JunkVec1,JunkVec2);
       C->Init = FALSE;
-         
+
       VxV(wb0n,Gs,wxGs);
       for(i=0;i<3;i++) {
          Ga[i] = 0.0;
@@ -48,7 +48,7 @@ void FindCmgTrq(struct CMGType *C, double wb0n[3])
       }
       for(i=0;i<3;i++) Trq[i] = -C->I[i]*(Ga[i] + Gds[i] + wxGs[i]);
       MTxV(C->CB,Trq,C->Trq);
-#endif      
+#endif
 }
 /**********************************************************************/
 void PassiveJointFrcTrq(double *u, double *x, struct SCType *S)
@@ -3116,15 +3116,15 @@ void PolyhedronCowellRK4(struct SCType *S)
       PolyhedronGravAcc(G,W->Density,u,W->CWN,GravAccN);
       PolyhedronCowellEOM( u, m1, S->mass, GravAccN, S->Frc);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m1[j];
-      
+
       PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
       PolyhedronCowellEOM(uu, m2, S->mass, GravAccN, S->Frc);
       for(j=0;j<6;j++) uu[j] = u[j] + 0.5*DTSIM*m2[j];
-    
+
       PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
       PolyhedronCowellEOM(uu, m3, S->mass, GravAccN, S->Frc);
       for(j=0;j<6;j++) uu[j] = u[j] + DTSIM*m3[j];
-      
+
       PolyhedronGravAcc(G,W->Density,uu,W->CWN,GravAccN);
       PolyhedronCowellEOM(uu, m4, S->mass, GravAccN, S->Frc);
       for(j=0;j<6;j++) u[j]+=DTSIM/6.0*(m1[j]+2.0*(m2[j]+m3[j])+m4[j]);
@@ -3392,7 +3392,6 @@ void Dynamics(struct SCType *S)
       struct OrbitType *O;
 
       O = &Orb[S->RefOrb];
-
       switch(S->RotDOF) {
          case ROTDOF_STEADY :
             SteadyAttitudeMotion(S);
@@ -3453,7 +3452,6 @@ void Dynamics(struct SCType *S)
             printf("Unknown Orbit Regime in Dynamics.  Bailing out.\n");
             exit(1);
       }
-
 }
 
 /* #ifdef __cplusplus

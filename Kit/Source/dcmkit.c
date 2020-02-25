@@ -569,14 +569,14 @@ void PrincipalMOI(double Ib[3][3], double Ip[3], double CPB[3][3])
             id = 1;
             jd = 2;
          }
-      
+
          if (I[id][id] == I[jd][jd]) {
             th = 0.78540; /* pi/4 */
          }
          else {
             th = 0.5*atan2(2.0*I[id][jd],I[id][id]-I[jd][jd]);
          }
-      
+
          for(i=0;i<3;i++) {
             for(j=0;j<3;j++) {
                C[i][j] = 0.0;
@@ -587,7 +587,7 @@ void PrincipalMOI(double Ib[3][3], double Ip[3], double CPB[3][3])
          C[jd][jd] =  cos(th);
          C[id][jd] =  sin(th);
          C[jd][id] = -sin(th);
-      
+
          MxM(C,I,CI);
          MxMT(CI,C,CICT);
          MxM(C,CPB,CCPB);
@@ -597,13 +597,13 @@ void PrincipalMOI(double Ib[3][3], double Ip[3], double CPB[3][3])
                CPB[i][j] = CCPB[i][j];
             }
          }
-      
+
          k++;
          if (MaxOffDiag < Tol || k > MaxK) Done = 1;
       }
-      
+
       for(i=0;i<3;i++) Ip[i] = I[i][i];
-      
+
       /* Flip Signs to make max elements in each row positive */
       for(i=0;i<3;i++) {
          MaxEl = fabs(CPB[i][0]);

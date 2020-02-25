@@ -273,7 +273,6 @@ long SimStep(const char *installedModelPath)
       struct SCType *S;
       long SimComplete;
       double TotalRunTime;
-
       if (First) {
          First = 0;
          SimTime = 0.0;
@@ -308,14 +307,15 @@ long SimStep(const char *installedModelPath)
 
       /* Update Dynamics to next Timestep */
       for(Isc=0;Isc<Nsc;Isc++) {
-         if (SC[Isc].Exists) Dynamics(&SC[Isc]);
+         if (SC[Isc].Exists) {
+            Dynamics(&SC[Isc]);
+         }
       }
+
       OrbitMotion();
       SimComplete = AdvanceTime();
-
       /* Update SC Bounding Boxes occasionally */
       ManageBoundingBoxes();
-
       #ifdef _ENABLE_SOCKETS_
       // NOTE: Commenting this out for now. May want to use this in the future.
 //         InterProcessComm(); /* Send and receive from external processes */
@@ -346,7 +346,6 @@ long SimStep(const char *installedModelPath)
             }
          #endif
       }
-
       return(SimComplete);
 
 }

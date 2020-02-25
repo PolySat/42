@@ -639,7 +639,7 @@ void Ephemerides(void)
          printf("Bogus Ephem Option in Ephemerides.  Bailing out.\n");
          exit(1);
       }
-      
+
 /* .. Locate Asteroids and Comets */
       for(Imb=0;Imb<Nmb;Imb++) {
          if(World[55+Imb].Exists){
@@ -767,7 +767,7 @@ void Ephemerides(void)
             S = &SC[Isc];
             O = &Orb[S->RefOrb];
             W = &World[O->World];
-            
+
             /* Local-vertical frame tied to SC */
             if (O->Regime == ORB_ZERO) {
                for(i=0;i<3;i++) {

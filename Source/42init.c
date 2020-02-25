@@ -212,7 +212,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"SERVER")) return IPC_SERVER;
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
       else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
-      
+
       else if (!strcmp(s,"MEAN")) return EPH_MEAN;
       else if (!strcmp(s,"DE430")) return EPH_DE430;
 
@@ -815,7 +815,6 @@ void InitOrbit(struct OrbitType *O)
          for(j=0;j<3;j++) p[j] = F->PosR[j];
          MTxV(O->CLN,p,F->PosR);
       }
-
       fclose(infile);
 
 }
@@ -1521,6 +1520,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
              &VelVec[0],&VelVec[1],&VelVec[2],junk,&newline);
 
+
 /* .. Initial Attitude */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%s %[^\n] %[\n]",response,junk,&newline);
@@ -1720,6 +1720,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
 
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                    &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            printf("Joint Sequence");
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,G->CGiBi);
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                   &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
@@ -1782,6 +1783,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                 &S->Whl[Iw].A[0],&S->Whl[Iw].A[1],
                 &S->Whl[Iw].A[2],junk,&newline);
+            printf("Wheel Spin Axes...\n");
             UNITV(S->Whl[Iw].A);
             PerpBasis(S->Whl[Iw].A,S->Whl[Iw].Uhat,S->Whl[Iw].Vhat);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
@@ -1814,6 +1816,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &S->MTB[Im].A[0],&S->MTB[Im].A[1],&S->MTB[Im].A[2],
                    junk,&newline);
+            printf("MagT Axes...\n");
             UNITV(S->MTB[Im].A);
             fscanf(infile,"%ld %[^\n] %[\n]",&S->MTB[Im].FlexNode,junk,&newline);
          }
@@ -1824,6 +1827,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nthr,junk,&newline);
       S->Thr = (struct ThrType *) calloc(S->Nthr,sizeof(struct ThrType));
       if (S->Nthr == 0) {
+         printf("Found no thrusters\n");
          for(i=0;i<5;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
@@ -1836,6 +1840,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
                    &S->Thr[It].A[0],
                    &S->Thr[It].A[1],
                    &S->Thr[It].A[2],junk,&newline);
+            printf("Thruster Axes...\n");
             UNITV(S->Thr[It].A);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                    &S->Thr[It].PosB[0],
@@ -1866,6 +1871,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             Gyro->SampleCounter = Gyro->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &Gyro->Axis[0],&Gyro->Axis[1],&Gyro->Axis[2],junk,&newline);
+            printf("Gyro Axes...\n");
             UNITV(Gyro->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->MaxRate,junk,&newline);
             Gyro->MaxRate *= D2R;
@@ -1882,21 +1888,22 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Bias,junk,&newline);
             Gyro->Bias *= D2R/3600.0;
             fscanf(infile,"%ld %[^\n] %[\n]",&Gyro->FlexNode,junk,&newline);
-            
+
             Gyro->BiasStabCoef = Gyro->SigU*sqrt(Gyro->SampleTime);
-            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime 
+            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime
                                + Gyro->SigU*Gyro->SigU*Gyro->SampleTime/12.0);
             Gyro->AngNoiseCoef = Gyro->SigE/sqrt(Gyro->SampleTime);
             Gyro->CorrCoef = 1.0-Gyro->SampleTime/(BiasTime*3600.0);
             Gyro->Angle = 0.0;
          }
       }
-      
+
 /* .. Magnetometer Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmag,junk,&newline);
       S->MAG = (struct MagnetometerType *) calloc(S->Nmag,sizeof(struct MagnetometerType));
       if (S->Nmag == 0) {
+         printf("Found no magnetometers...\n");
          for(i=0;i<8;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
@@ -1913,6 +1920,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             MAG->SampleCounter = MAG->MaxCounter;
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &MAG->Axis[0],&MAG->Axis[1],&MAG->Axis[2],junk,&newline);
+            printf("MagM Axes...\n");
             UNITV(MAG->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Saturation,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->Scale,junk,&newline);
@@ -1922,12 +1930,13 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%ld %[^\n] %[\n]",&MAG->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Coarse Sun Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
       S->CSS = (struct CssType *) calloc(S->Ncss,sizeof(struct CssType));
       if (S->Ncss == 0) {
+         printf("Found no coarse sun sensors...\n");
          for(i=0;i<7;i++) fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       }
       else {
@@ -1944,6 +1953,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             CSS->SampleCounter = CSS->MaxCounter;
             fscanf(infile,"%ld  %lf %lf %lf %[^\n] %[\n]",
                &CSS->Body,&CSS->Axis[0],&CSS->Axis[1],&CSS->Axis[2],junk,&newline);
+            printf("CSS Axes...\n");
             UNITV(CSS->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->FovHalfAng,junk,&newline);
             CSS->FovHalfAng *= D2R;
@@ -1975,6 +1985,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             FSS->SampleCounter = FSS->MaxCounter;
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            printf("FSS Sequence...\n");
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,FSS->CB);
             C2Q(FSS->CB,FSS->qb);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
@@ -1989,7 +2000,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%ld %[^\n] %[\n]",&FSS->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Star Trackers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
@@ -2011,6 +2022,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             ST->SampleCounter = ST->MaxCounter;
             fscanf(infile,"%lf %lf %lf %ld %[^\n] %[\n]",
                &Ang1,&Ang2,&Ang3,&Seq,junk,&newline);
+            printf("Star tracker sequence...\n");
             A2C(Seq,Ang1*D2R,Ang2*D2R,Ang3*D2R,ST->CB);
             C2Q(ST->CB,ST->qb);
             fscanf(infile,"%lf %lf %[^\n] %[\n]",
@@ -2034,7 +2046,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
                &ST->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. GPS Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
@@ -2060,7 +2072,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%ld %[^\n] %[\n]",&GPS->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Accelerometers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
@@ -2077,7 +2089,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             if (Accel->MaxCounter < 1) {
                Accel->MaxCounter = 1;
                Accel->SampleTime = DTSIM;
-              
+
                printf("Info:  Accel[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ia);
             }
             Accel->SampleCounter = Accel->MaxCounter;
@@ -2085,6 +2097,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
                &Accel->PosB[0],&Accel->PosB[1],&Accel->PosB[2],junk,&newline);
             fscanf(infile,"%lf %lf %lf %[^\n] %[\n]",
                &Accel->Axis[0],&Accel->Axis[1],&Accel->Axis[2],junk,&newline);
+            printf("Accel Axes...");
             UNITV(Accel->Axis);
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->MaxAcc,junk,&newline);
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Scale,junk,&newline);
@@ -2098,7 +2111,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Bias,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&Accel->FlexNode,junk,&newline);
             Accel->BiasStabCoef = Accel->SigU*sqrt(Accel->SampleTime);
-            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime 
+            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime
                                + Accel->SigU*Accel->SigU*Accel->SampleTime/12.0);
             Accel->DVNoiseCoef = Accel->SigE/sqrt(Accel->SampleTime);
             Accel->CorrCoef = 1.0-Accel->SampleTime/(BiasTime*3600.0);
@@ -2212,6 +2225,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
          S->PosN[j] = O->PosN[j] + S->PosR[j];
          S->VelN[j] = O->VelN[j] + S->VelR[j];
       }
+
       MTxV(World[O->World].CNH,S->PosN,rh);
       MTxV(World[O->World].CNH,S->VelN,vh);
       for(j=0;j<3;j++) {
@@ -2264,7 +2278,6 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       UpdateScBoundingBox(S);
 
       S->EnvTrq.First = 1;
-      
       InitAC(S);
 }
 /*********************************************************************/
@@ -3441,7 +3454,7 @@ long LoadDE430(char DE430Path[80],double JD)
       double rh[3],vh[3];
       double EarthMoonBaryPosH[3],EarthMoonBaryVelH[3];
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
-      double ZAxis[3] = {0.0,0.0,1.0}; 
+      double ZAxis[3] = {0.0,0.0,1.0};
       double PosJ[3],VelJ[3];
       double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
 
@@ -3479,14 +3492,14 @@ long LoadDE430(char DE430Path[80],double JD)
             }
          }
       }
-      
-/* .. Load block */ 
+
+/* .. Load block */
       for(i=1;i<340;i++) {
          fgets(line,512,infile);
          sscanf(line,"%lf %lf %lf",&Block[3*i],&Block[3*i+1],&Block[3*i+2]);
       }
       fclose(infile);
-            
+
 /* .. Distribute to Worlds [Starting Entry (1-based), Order, Number of Segments] */
       /* Mercury [3 14 4] */
       Iw = MERCURY;
@@ -3748,7 +3761,7 @@ long LoadDE430(char DE430Path[80],double JD)
       MxV(World[EARTH].CNH,vh,World[LUNA].eph.VelN);
       World[LUNA].PriMerAng = LunaPriMerAng(JulDay);
       SimpRot(ZAxis,World[LUNA].PriMerAng,World[LUNA].CWN);
-      
+
       for(Iw=MERCURY;Iw<=LUNA;Iw++) {
          Eph = &World[Iw].eph;
          RV2Eph(AbsTime,Eph->mu,Eph->PosN,Eph->VelN,
@@ -3780,7 +3793,7 @@ void LoadConstellations(void) {
 
          C->Star1 = (long *) calloc(C->Nlines,sizeof(long));
          C->Star2 = (long *) calloc(C->Nlines,sizeof(long));
-         
+
          for (j=0; j<C->Nstars; j++) {
             fscanf(infile,"%lf %lf %[^\n] %[\n]",&RA,&Dec,junk,&newline);
             RA *= D2R;
@@ -3791,10 +3804,10 @@ void LoadConstellations(void) {
          }
 
          for (j=0; j<C->Nlines; j++) {
-            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);                  
+            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);
          }
       }
-      
+
       fclose(infile);
 }
 /**********************************************************************/
@@ -3889,6 +3902,7 @@ void InitSim(int argc, char **argv)
             exit(1);
          }
       }
+
 /* .. Environment */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
 /* .. Date and time */
@@ -4099,10 +4113,10 @@ void InitSim(int argc, char **argv)
       }
 
       LoadTdrs();
-      
-      RNG = CreateRandomProcess(1);
 
+      RNG = CreateRandomProcess(1);
       LoadConstellations();
+      printf("Simulation Initialized Successfully...\n");
 }
 
 /* #ifdef __cplusplus
