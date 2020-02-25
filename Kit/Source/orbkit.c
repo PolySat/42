@@ -493,7 +493,7 @@ long LoadTleFromFile(const char *Path, const char *TleFileName,
       Label[24] = '\0';
       while(!feof(infile) && !Success) {
          fgets(line,80,infile);
-         if (!strncmp(line,Label,24)) {
+         if (!strncmp(line,Label,strlen(line) - 1)) {
             Success = 1;
             fgets(line1,80,infile);
             fgets(line2,80,infile);
@@ -2539,7 +2539,7 @@ void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
 {
 #define TWOPI (6.283185307179586)
       double p2,Coef,e2,e4,sin2i,n;
-      
+
       n = sqrt(mu/O->SMA/O->SMA/O->SMA);
       p2 = O->SLR*O->SLR;
       Coef = 1.5*J2*Rw*Rw/p2;
@@ -2552,7 +2552,7 @@ void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
 
 /* .. Precession of Periapsis */
       O->ArgPdot = Coef*n*(2.0-2.5*sin2i);
-      
+
 /* .. Avg Radial Accel (positive toward zenith) */
       O->J2Fr0 = -Coef*mu/p2*(1.0+3.0*e2+0.375*e4-1.5*sin2i*(1.0-cos(2.0*O->ArgP)*(1.5*e2+0.25*e4)));
 /* .. Amplitude for orbit-rate orbit-normal accel */
@@ -2564,7 +2564,7 @@ void FindJ2DriftParms(double mu, double J2, double Rw, struct OrbitType *O)
 /* .. Adjust mean motion, period */
       O->MeanMotion = sqrt(O->MuPlusJ2/O->SMA/O->SMA/O->SMA);
       O->Period = TWOPI/O->MeanMotion;
-      
+
 #undef TWOPI
 }
 

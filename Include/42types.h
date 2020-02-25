@@ -209,6 +209,7 @@ struct MTBType {
 
 struct ThrType {
    /*~ Internal Variables ~*/
+   char name[NAME_MAX_CHARS];
    double Fmax;
    double F;
    long Body; /* Body that thruster is mounted on */
@@ -221,6 +222,7 @@ struct ThrType {
 
 struct GyroType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    double Axis[3];
@@ -247,6 +249,7 @@ struct GyroType {
 
 struct MagnetometerType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    double Axis[3];
@@ -263,6 +266,7 @@ struct MagnetometerType {
 
 struct CssType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    long Body;
@@ -281,6 +285,7 @@ struct CssType {
 
 struct FssType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    double qb[4];
@@ -300,6 +305,7 @@ struct FssType {
 
 struct StarTrackerType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    double qb[4];
@@ -323,6 +329,7 @@ struct StarTrackerType {
 
 struct GpsType {
    /*~ Parameters ~*/
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long MaxCounter;
    double PosNoise;
@@ -346,6 +353,7 @@ struct GpsType {
 
 struct AccelType {
    /* Parameters */
+   char name[NAME_MAX_CHARS];
    double SampleTime;
    long SampleCounter;
    long MaxCounter;

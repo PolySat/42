@@ -212,7 +212,7 @@ long DecodeString(char *s)
       else if (!strcmp(s,"SERVER")) return IPC_SERVER;
       else if (!strcmp(s,"CLIENT")) return IPC_CLIENT;
       else if (!strcmp(s,"GMSEC_CLIENT")) return IPC_GMSEC_CLIENT;
-      
+
       else if (!strcmp(s,"MEAN")) return EPH_MEAN;
       else if (!strcmp(s,"DE430")) return EPH_DE430;
 
@@ -1828,7 +1828,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       }
       else {
          for(It=0;It<S->Nthr;It++) {
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Thr[It].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&S->Thr[It].Fmax,
                    junk,&newline);
             fscanf(infile,"%ld %lf %lf %lf %[^\n] %[\n]",
@@ -1855,7 +1858,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ig=0;Ig<S->Ngyro;Ig++) {
             Gyro = &S->Gyro[Ig];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Gyro[Ig].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->SampleTime,junk,&newline);
             Gyro->MaxCounter = (long) (Gyro->SampleTime/DTSIM+0.5);
             if (Gyro->MaxCounter < 1) {
@@ -1882,16 +1888,16 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%lf %[^\n] %[\n]",&Gyro->Bias,junk,&newline);
             Gyro->Bias *= D2R/3600.0;
             fscanf(infile,"%ld %[^\n] %[\n]",&Gyro->FlexNode,junk,&newline);
-            
+
             Gyro->BiasStabCoef = Gyro->SigU*sqrt(Gyro->SampleTime);
-            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime 
+            Gyro->ARWCoef = sqrt(Gyro->SigV*Gyro->SigV/Gyro->SampleTime
                                + Gyro->SigU*Gyro->SigU*Gyro->SampleTime/12.0);
             Gyro->AngNoiseCoef = Gyro->SigE/sqrt(Gyro->SampleTime);
             Gyro->CorrCoef = 1.0-Gyro->SampleTime/(BiasTime*3600.0);
             Gyro->Angle = 0.0;
          }
       }
-      
+
 /* .. Magnetometer Parameters */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nmag,junk,&newline);
@@ -1902,7 +1908,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Im=0;Im<S->Nmag;Im++) {
             MAG = &S->MAG[Im];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->MAG[Im].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&MAG->SampleTime,junk,&newline);
             MAG->MaxCounter = (long) (MAG->SampleTime/DTSIM+0.5);
             if (MAG->MaxCounter < 1) {
@@ -1922,7 +1931,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%ld %[^\n] %[\n]",&MAG->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Coarse Sun Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ncss,junk,&newline);
@@ -1933,7 +1942,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ic=0;Ic<S->Ncss;Ic++) {
             CSS = &S->CSS[Ic];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->CSS[Ic].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&CSS->SampleTime,junk,&newline);
             CSS->MaxCounter = (long) (CSS->SampleTime/DTSIM+0.5);
             if (CSS->MaxCounter < 1) {
@@ -1964,7 +1976,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ifss=0;Ifss<S->Nfss;Ifss++) {
             FSS = &S->FSS[Ifss];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->FSS[Ifss].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&FSS->SampleTime,junk,&newline);
             FSS->MaxCounter = (long) (FSS->SampleTime/DTSIM+0.5);
             if (FSS->MaxCounter < 1) {
@@ -1989,7 +2004,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%ld %[^\n] %[\n]",&FSS->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Star Trackers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nst,junk,&newline);
@@ -2000,7 +2015,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ist=0;Ist<S->Nst;Ist++) {
             ST = &S->ST[Ist];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->ST[Ist].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&ST->SampleTime,junk,&newline);
             ST->MaxCounter = (long) (ST->SampleTime/DTSIM+0.5);
             if (ST->MaxCounter < 1) {
@@ -2034,7 +2052,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
                &ST->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. GPS Sensors */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Ngps,junk,&newline);
@@ -2045,7 +2063,10 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ig=0;Ig<S->Ngps;Ig++) {
             GPS = &S->GPS[Ig];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->GPS[Ig].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&GPS->SampleTime,junk,&newline);
             GPS->MaxCounter = (long) (GPS->SampleTime/DTSIM+0.5);
             if (GPS->MaxCounter < 1) {
@@ -2060,7 +2081,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%ld %[^\n] %[\n]",&GPS->FlexNode,junk,&newline);
          }
       }
-      
+
 /* .. Accelerometers */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
       fscanf(infile,"%ld %[^\n] %[\n]",&S->Nacc,junk,&newline);
@@ -2071,13 +2092,16 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       else {
          for(Ia=0;Ia<S->Nacc;Ia++) {
             Accel = &S->Accel[Ia];
-            fscanf(infile,"%[^\n] %[\n]",junk,&newline);
+            if (fscanf(infile,"%*[= ]NAME:%s %*[^\n] %*[\n]", S->Accel[Ia].name) < 1) {
+               // Support devices without name for backwards compatability
+               fscanf(infile,"%[^\n] %[\n]", junk,&newline);
+            }
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->SampleTime,junk,&newline);
             Accel->MaxCounter = (long) (Accel->SampleTime/DTSIM+0.5);
             if (Accel->MaxCounter < 1) {
                Accel->MaxCounter = 1;
                Accel->SampleTime = DTSIM;
-              
+
                printf("Info:  Accel[%ld].SampleTime was smaller than DTSIM.  It has been adjusted to be DTSIM.\n",Ia);
             }
             Accel->SampleCounter = Accel->MaxCounter;
@@ -2098,7 +2122,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
             fscanf(infile,"%lf %[^\n] %[\n]",&Accel->Bias,junk,&newline);
             fscanf(infile,"%ld %[^\n] %[\n]",&Accel->FlexNode,junk,&newline);
             Accel->BiasStabCoef = Accel->SigU*sqrt(Accel->SampleTime);
-            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime 
+            Accel->DVRWCoef = sqrt(Accel->SigV*Accel->SigV/Accel->SampleTime
                                + Accel->SigU*Accel->SigU*Accel->SampleTime/12.0);
             Accel->DVNoiseCoef = Accel->SigE/sqrt(Accel->SampleTime);
             Accel->CorrCoef = 1.0-Accel->SampleTime/(BiasTime*3600.0);
@@ -2264,7 +2288,7 @@ void InitSpacecraft(struct SCType *S, const char *installedModelPath)
       UpdateScBoundingBox(S);
 
       S->EnvTrq.First = 1;
-      
+
       InitAC(S);
 }
 /*********************************************************************/
@@ -3441,7 +3465,7 @@ long LoadDE430(char DE430Path[80],double JD)
       double rh[3],vh[3];
       double EarthMoonBaryPosH[3],EarthMoonBaryVelH[3];
       double EMRAT = 81.30056907419062; /* Earth-Moon mass ratio */
-      double ZAxis[3] = {0.0,0.0,1.0}; 
+      double ZAxis[3] = {0.0,0.0,1.0};
       double PosJ[3],VelJ[3];
       double qJ2000H[4] = {-0.203123038887,  0.0,  0.0,  0.979153221449};
 
@@ -3479,14 +3503,14 @@ long LoadDE430(char DE430Path[80],double JD)
             }
          }
       }
-      
-/* .. Load block */ 
+
+/* .. Load block */
       for(i=1;i<340;i++) {
          fgets(line,512,infile);
          sscanf(line,"%lf %lf %lf",&Block[3*i],&Block[3*i+1],&Block[3*i+2]);
       }
       fclose(infile);
-            
+
 /* .. Distribute to Worlds [Starting Entry (1-based), Order, Number of Segments] */
       /* Mercury [3 14 4] */
       Iw = MERCURY;
@@ -3748,7 +3772,7 @@ long LoadDE430(char DE430Path[80],double JD)
       MxV(World[EARTH].CNH,vh,World[LUNA].eph.VelN);
       World[LUNA].PriMerAng = LunaPriMerAng(JulDay);
       SimpRot(ZAxis,World[LUNA].PriMerAng,World[LUNA].CWN);
-      
+
       for(Iw=MERCURY;Iw<=LUNA;Iw++) {
          Eph = &World[Iw].eph;
          RV2Eph(AbsTime,Eph->mu,Eph->PosN,Eph->VelN,
@@ -3780,7 +3804,7 @@ void LoadConstellations(void) {
 
          C->Star1 = (long *) calloc(C->Nlines,sizeof(long));
          C->Star2 = (long *) calloc(C->Nlines,sizeof(long));
-         
+
          for (j=0; j<C->Nstars; j++) {
             fscanf(infile,"%lf %lf %[^\n] %[\n]",&RA,&Dec,junk,&newline);
             RA *= D2R;
@@ -3791,10 +3815,10 @@ void LoadConstellations(void) {
          }
 
          for (j=0; j<C->Nlines; j++) {
-            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);                  
+            fscanf(infile,"%ld %ld %[^\n] %[\n]",&C->Star1[j],&C->Star2[j],junk,&newline);
          }
       }
-      
+
       fclose(infile);
 }
 /**********************************************************************/
@@ -3868,7 +3892,6 @@ void InitSim(int argc, char **argv)
          Orb[Iorb].Exists = DecodeString(response);
          Orb[Iorb].Tag = Iorb;
       }
-
 
 /* .. Spacecraft */
       fscanf(infile,"%[^\n] %[\n]",junk,&newline);
@@ -4099,7 +4122,7 @@ void InitSim(int argc, char **argv)
       }
 
       LoadTdrs();
-      
+
       RNG = CreateRandomProcess(1);
 
       LoadConstellations();
