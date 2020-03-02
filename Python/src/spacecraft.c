@@ -105,11 +105,11 @@ nasa42_Spacecraft_set_wheel(PyObject *self, PyObject *args, PyObject *kwds)
    static char *kwlist[] = {"name", "torque", NULL};
 
    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sd", kwlist, &dev_name, &torque) ) {
-      PyErr_SetString(PyExc_RuntimeError, "set_mtb parameters incorrect.");
+      PyErr_SetString(PyExc_RuntimeError, "set_wheel parameters incorrect.");
       return NULL;
    }
 
-   // Find the MTB object by name
+   // Find the wheel object by name
    for (; i < sc->sc->Nw && strcmp(sc->sc->Whl[i].name, dev_name); i++) {}
 
    if (i == sc->sc->Nw) {
@@ -503,9 +503,9 @@ static PyGetSetDef nasa42_Spacecraft_getset[] = {
 
     {"gyros", nasa42_Spacecraft_gyros, NULL, "Dictonary of all gyros.", NULL},
     {"wheels", nasa42_Spacecraft_wheels, NULL, "Dictonary of all wheels.", NULL},
-    {"magnetometer", nasa42_Spacecraft_magnetometer,NULL, "Dictionary of all magnetometer", NULL},
+    {"magnetometer", nasa42_Spacecraft_magnetometer,NULL, "Dictionary of all magnetometers", NULL},
     {"fss", nasa42_Spacecraft_FSS,NULL, "Dictionary of all the FSSs", NULL},
-    {"star_tracker", nasa42_Spacecraft_ST,NULL,"Dictionary of all the Star Tracker", NULL},
+    {"star_tracker", nasa42_Spacecraft_ST,NULL,"Dictionary of all the Star Trackers", NULL},
     {"gps", nasa42_Spacecraft_GPS,NULL, "Dictionary of all the GPSs", NULL},
 
     {NULL, NULL, NULL, NULL, NULL}

@@ -312,13 +312,13 @@ void Environment(struct SCType *S, const char *installedModelPath)
       /* .. Use of NOAA and Schatten files for Solar Flux and AP values */
       if (UseFileForInterpolation == TWOSIGMA_KP){
          TwoSigmaAtmoParam();
-      printf("AP 2Sigma value is %lf \n", GeomagIndex);
-      printf("Flux 2Sigma value is %lf \n", Flux10p7);
+      //printf("AP 2Sigma value is %lf \n", GeomagIndex);
+      //printf("Flux 2Sigma value is %lf \n", Flux10p7);
       }
       else if (UseFileForInterpolation == NOMINAL){
          NominalAtmoParam();
-      printf("AP 2Sigma value is %lf \n", GeomagIndex);
-      printf("Flux 2Sigma value is %lf \n", Flux10p7);
+      //printf("AP 2Sigma value is %lf \n", GeomagIndex);
+      //printf("Flux 2Sigma value is %lf \n", Flux10p7);
       }
       /* .. Atmospheric Density */
       if (O->World == EARTH) {
