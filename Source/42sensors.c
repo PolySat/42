@@ -267,8 +267,8 @@ void FssModel(struct SCType *S)
                   Counts = (long) (Signal/FSS->Quant+0.5);
                   FSS->SunAng[i] = ((double) Counts)*FSS->Quant;
                }
-               FSS->SunVecS[0] = sin(SunAng[0]);
-               FSS->SunVecS[1] = sin(SunAng[1]);
+               FSS->SunVecS[0] = sin(FSS->SunAng[0]);
+               FSS->SunVecS[1] = sin(FSS->SunAng[1]);
                FSS->SunVecS[2] = sqrt(1.0 - FSS->SunVecS[0]*FSS->SunVecS[0] - FSS->SunVecS[1]*FSS->SunVecS[1]);
             }
             else {
